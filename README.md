@@ -7,7 +7,7 @@ system options -> boot/auto login -> console autologin
 ```
 sudo apt update
 sudo apt -y upgrade
-sudo apt -y install git jq virtualenvwrapper pipx fonts-noto-color-emoji
+sudo apt -y install git jq virtualenvwrapper pipx fonts-noto-color-emoji netplan.io  
 ```
 
 
