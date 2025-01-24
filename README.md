@@ -7,8 +7,8 @@ system options -> boot/auto login -> console autologin
 ```
 sudo apt update
 sudo apt -y upgrade
-sudo apt -y install git jq ntp virtualenvwrapper pipx fonts-noto-color-emoji cmake libyaml-dev libglib2.0-dev libsystemd-dev pyflakes3 pycodestyle python3-coverage pandoc libcmocka-dev 
-pip3 install cffi --break-system-packages
+sudo apt -y install git jq ntp virtualenvwrapper pipx fonts-noto-color-emoji  
+
 ```
 
 
@@ -85,6 +85,10 @@ sudo tailscale up
 
 # Setup multiple wifi connections
  ```
-git clone https://github.com/canonical/netplan.git
-
+sudo nmcli dev wifi list
+sudo nmcli dev wifi connect "John Doe’s iPhone" password "setec astronomy"
+```
+Verify the saved SSID
+```
+sudo nmcli connection show
 ```
