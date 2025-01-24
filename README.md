@@ -62,3 +62,8 @@ Do you want to add a local user (meshbot) no login, for the bot? (y/n)y
 Do you want to install the emoji font for debian/ubuntu linux? (y/n)y  
 Do you want to install the LLM Ollama components? (y/n)n  
 
+# Exit meshtastic-venv
+```
+deactivate
+```
+
