@@ -43,13 +43,14 @@ pip3 install --upgrade "meshtastic[cli]"
 # Install BBS system.
 https://github.com/SpudGunMan/meshing-around
 
-```cd ~
+```
+cd ~
 source meshtastic-venv/bin/activate
 git clone https://github.com/spudgunman/meshing-around
 cd meshing-around/
 ./install.sh
 cd /opt/meshing-around
-`./install.sh
+./install.sh
 ```
 
 Are You installing into an embedded system like a luckfox or -native? most should say no here (y/n)n  
