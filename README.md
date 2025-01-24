@@ -67,3 +67,12 @@ Do you want to install the LLM Ollama components? (y/n)n
 deactivate
 ```
 
+# Install VPN
+100 devices on the free tier  
+https://login.tailscale.com/admin/  
+```
+curl -fsSL https://tailscale.com/install.sh | sh  
+curl -fsSL https://tailscale.com/install.sh | sh  
+sudo tailscale up  
+```
+
