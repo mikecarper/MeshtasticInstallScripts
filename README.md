@@ -7,7 +7,8 @@ system options -> boot/auto login -> console autologin
 ```
 sudo apt update
 sudo apt -y upgrade
-sudo apt -y install git jq virtualenvwrapper pipx fonts-noto-color-emoji netplan.io  
+sudo apt -y install git jq ntp virtualenvwrapper pipx fonts-noto-color-emoji cmake libyaml-dev libglib2.0-dev libsystemd-dev pyflakes3 pycodestyle python3-coverage pandoc libcmocka-dev 
+pip3 install cffi --break-system-packages
 ```
 
 
@@ -37,6 +38,12 @@ cd ~
 source meshtastic-venv/bin/activate
 pip3 install --upgrade pytap2
 pip3 install --upgrade "meshtastic[cli]"
+```
+OR  
+```
+sudo add-apt-repository ppa:meshtastic/daily
+sudo apt update
+sudo apt install meshtasticd
 ```
 
 
@@ -76,3 +83,8 @@ curl -fsSL https://tailscale.com/install.sh | sh
 sudo tailscale up  
 ```
 
+# Setup multiple wifi connections
+ ```
+git clone https://github.com/canonical/netplan.git
+
+```
