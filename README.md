@@ -92,15 +92,19 @@ meshtastic --setlon -122.1019996
 https://meshtastic.org/docs/configuration/radio/device/#cli
 ```
 meshtastic --set device.role ROUTER_LATE
+meshtastic --set lora.hop_limit 7
 ```
 
 
 # Add channels
 https://pugetmesh.org/meshtastic/config/#ps-mqtt-channel  
+https://meshtastic.org/docs/configuration/radio/channels/
 ```
 source meshtastic-venv/bin/activate
-meshtastic --ch-add PS-Mesh! --ch-set psk base64:jHrxpQOq6dEBC5Ldr3ULrQ==
-meshtastic --ch-add PS-MQTT! --ch-set psk base64:mqttmqttmqttmqttmqttQQ==
+meshtastic --ch-add PS-Mesh!
+meshtastic --ch-set psk base64:jHrxpQOq6dEBC5Ldr3ULrQ== --ch-index 1
+meshtastic --ch-add PS-MQTT! 
+meshtastic --ch-set psk base64:mqttmqttmqttmqttmqttQQ== --ch-index 2
 
 ```
 
@@ -108,6 +112,7 @@ meshtastic --ch-add PS-MQTT! --ch-set psk base64:mqttmqttmqttmqttmqttQQ==
 # MQTT
 https://meshtastic.org/docs/configuration/module/mqtt/
 ```
+meshtastic --set lora.config_ok_to_mqtt true
 meshtastic --set mqtt.enabled true
 meshtastic --ch-set uplink_enabled true --ch-index 1
 meshtastic --ch-set uplink_enabled true --ch-index 2
