@@ -92,3 +92,22 @@ Verify the saved SSID
 ```
 sudo nmcli connection show
 ```
+
+
+# Add channels
+https://pugetmesh.org/meshtastic/config/#ps-mqtt-channel  
+```
+source meshtastic-venv/bin/activate
+meshtastic --ch-add PS-Mesh!	--psk jHrxpQOq6dEBC5Ldr3ULrQ==
+meshtastic --ch-add PS-MQTT!	--psk mqttmqttmqttmqttmqttQQ==
+
+
+```
+
+
+# MQTT
+```
+sudo apt install -y mosquitto mosquitto-clients
+sudo systemctl enable mosquitto
+sudo systemctl start mosquitto
+```
