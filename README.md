@@ -74,7 +74,7 @@ https://pugetmesh.org/meshtastic/config/#ps-mqtt-channel
 ```
 source meshtastic-venv/bin/activate
 meshtastic --ch-add PS-Mesh! --set ch.key jHrxpQOq6dEBC5Ldr3ULrQ==
-meshtastic --ch-add PS-Mesh! --set ch.key mqttmqttmqttmqttmqttQQ==
+meshtastic --ch-add PS-MQTT! --set ch.key mqttmqttmqttmqttmqttQQ==
 
 ```
 
