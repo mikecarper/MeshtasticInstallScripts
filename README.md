@@ -106,7 +106,12 @@ meshtastic --ch-add PS-MQTT! --ch-set psk base64:mqttmqttmqttmqttmqttQQ==
 
 
 # MQTT
+https://meshtastic.org/docs/configuration/module/mqtt/
 ```
+meshtastic --set mqtt.enabled true
+meshtastic --ch-set uplink_enabled true --ch-index 1
+meshtastic --ch-set uplink_enabled true --ch-index 2
+
 sudo systemctl enable mosquitto
 sudo systemctl start mosquitto
 ```
