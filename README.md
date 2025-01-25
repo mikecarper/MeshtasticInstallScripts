@@ -68,13 +68,39 @@ sudo apt update
 sudo apt install meshtasticd
 ```
 
+# Rename Device
+https://meshtastic.org/docs/software/python/cli/#--set-owner-set_owner
+```
+deviceShortName=$(meshtastic --info | grep 'Owner' | sed -n 's/.*(\(.*\)).*/\1/p')
+echo $deviceShortName
+
+meshtastic --set-owner "🤖 mcar NE Bell bbs bot DM ($deviceShortName)"
+meshtastic --set-owner-short "🤖"
+```
+
+
+# Set Location
+https://meshtastic.org/docs/software/python/cli/#--setalt-setalt
+```
+meshtastic --setalt 86
+meshtastic --setlat 47.625127
+meshtastic --setlon -122.1019996
+```
+
+
+# Set mode of Device
+https://meshtastic.org/docs/configuration/radio/device/#cli
+```
+meshtastic --set device.role ROUTER_LATE
+```
+
 
 # Add channels
 https://pugetmesh.org/meshtastic/config/#ps-mqtt-channel  
 ```
 source meshtastic-venv/bin/activate
-meshtastic --ch-add PS-Mesh! --set ch.key jHrxpQOq6dEBC5Ldr3ULrQ==
-meshtastic --ch-add PS-MQTT! --set ch.key mqttmqttmqttmqttmqttQQ==
+meshtastic --ch-add PS-Mesh! --ch-set psk base64:jHrxpQOq6dEBC5Ldr3ULrQ==
+meshtastic --ch-add PS-MQTT! --ch-set psk base64:mqttmqttmqttmqttmqttQQ==
 
 ```
 
