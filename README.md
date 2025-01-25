@@ -73,9 +73,8 @@ sudo apt install meshtasticd
 https://pugetmesh.org/meshtastic/config/#ps-mqtt-channel  
 ```
 source meshtastic-venv/bin/activate
-meshtastic --ch-add PS-Mesh!	--psk jHrxpQOq6dEBC5Ldr3ULrQ==
-meshtastic --ch-add PS-MQTT!	--psk mqttmqttmqttmqttmqttQQ==
-
+meshtastic --ch-add PS-Mesh! --set ch.key jHrxpQOq6dEBC5Ldr3ULrQ==
+meshtastic --ch-add PS-Mesh! --set ch.key mqttmqttmqttmqttmqttQQ==
 
 ```
 
