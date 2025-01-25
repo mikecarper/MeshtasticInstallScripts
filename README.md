@@ -74,7 +74,7 @@ https://meshtastic.org/docs/software/python/cli/#--set-owner-set_owner
 deviceShortName=$(meshtastic --info | grep 'Owner' | sed -n 's/.*(\(.*\)).*/\1/p')
 echo $deviceShortName
 
-meshtastic --set-owner "🤖 mcar NE Bell bbs bot DM ($deviceShortName)"
+meshtastic --set-owner "🤖mcar NEBell bbsbot DM $deviceShortName"
 meshtastic --set-owner-short "🤖"
 ```
 
