@@ -110,10 +110,23 @@ meshtastic --ch-set psk base64:mqttmqttmqttmqttmqttQQ== --ch-index 2
 
 
 # MQTT
-https://meshtastic.org/docs/configuration/module/mqtt/
+https://meshtastic.org/docs/configuration/module/mqtt/#mqtt-module-config-client-availability
 ```
+meshtastic --set network.wifi_enabled true --set network.wifi_ssid "FCC Van" --set network.wifi_psk wifipassword
 meshtastic --set lora.config_ok_to_mqtt true
 meshtastic --set mqtt.enabled true
+meshtastic --set mqtt.address mqtt.davekeogh.com
+meshtastic --set mqtt.username meshdev
+meshtastic --set mqtt.password large4cats
+meshtastic --set mqtt.encryption_enabled true
+meshtastic --set mqtt.json_enabled false
+meshtastic --set mqtt.tls_enabled false
+meshtastic --set mqtt.tls_enabled false
+meshtastic --set mqtt.root msh/US
+meshtastic --set mqtt.map_reporting_enabled true
+
+meshtastic --set mqtt.enabled true --set mqtt.address mqtt.davekeogh.com --set mqtt.username meshdev --set mqtt.password large4cats --set mqtt.encryption_enabled true --set mqtt.json_enabled false --set mqtt.tls_enabled false --set mqtt.tls_enabled false --set mqtt.root msh/US --set mqtt.map_reporting_enabled true
+
 meshtastic --ch-set uplink_enabled true --ch-index 1
 meshtastic --ch-set uplink_enabled true --ch-index 2
 
