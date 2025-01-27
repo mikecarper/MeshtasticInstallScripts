@@ -1,15 +1,20 @@
 #!/usr/bin/env bash
 
 set -euo pipefail
-
+echo "Update"
 sudo apt update
+
+echo "Upgrade"
 sudo apt -y upgrade
+
+echo "apt packages"
 sudo apt -y install git jq ntp virtualenvwrapper pipx fonts-noto-color-emoji software-properties-common mosquitto mosquitto-clients 
 
+echo "tailscale vpn"
 curl -fsSL https://tailscale.com/install.sh | sh  
 sudo tailscale up  
 
-
+echo "add wifi networks"
 # Function to display a menu of available Wi-Fi networks
 function display_wifi_menu {
     echo "Scanning for Wi-Fi networks..."
@@ -92,19 +97,24 @@ else
 fi
 
 
-
+echo "python3 -m venv"
 cd ~
 python3 -m venv meshtastic-venv
 source meshtastic-venv/bin/activate
+
+echo "esptool"
 pip install --upgrade esptool 
 #esptool.py chip_id
 
 cd ~
 source meshtastic-venv/bin/activate
+echo "pytap2"
 pip3 install --upgrade pytap2
+echo "meshtastic cli"
 pip3 install --upgrade "meshtastic[cli]"
 
 cd ~
+echo "spudgunman bbs"
 source meshtastic-venv/bin/activate
 git clone https://github.com/spudgunman/meshing-around
 chmod +x ~/meshing-around/install.sh
@@ -150,8 +160,10 @@ sed -i \
 # Print a message to confirm
 echo "Config file updated successfully."
 
+echo "mesh_bot systemctl"
 sudo systemctl daemon-reload
 sudo systemctl enable mesh_bot
 sudo systemctl start mesh_bot
 sudo systemctl status mesh_bot
+
 sudo reboot
