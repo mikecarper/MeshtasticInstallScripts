@@ -95,9 +95,7 @@ meshtastic --set-owner-short "🤖"
 # Set Location
 https://meshtastic.org/docs/software/python/cli/#--setalt-setalt
 ```
-meshtastic --setalt 86
-meshtastic --setlat 47.625127
-meshtastic --setlon -122.1019996
+meshtastic --setalt 86 --setlat 47.625127 --setlon -122.1019996
 ```
 
 
