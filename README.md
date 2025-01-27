@@ -12,6 +12,16 @@ sudo apt -y install git jq ntp virtualenvwrapper pipx fonts-noto-color-emoji sof
 ```
 
 
+# Install VPN
+100 devices on the free tier  
+https://login.tailscale.com/admin/  
+```
+curl -fsSL https://tailscale.com/install.sh | sh  
+curl -fsSL https://tailscale.com/install.sh | sh  
+sudo tailscale up  
+```
+
+
 # Setup multiple wifi connections
  ```
 sudo nmcli dev wifi list
@@ -23,14 +33,6 @@ sudo nmcli connection show
 ```
 
 
-# Install VPN
-100 devices on the free tier  
-https://login.tailscale.com/admin/  
-```
-curl -fsSL https://tailscale.com/install.sh | sh  
-curl -fsSL https://tailscale.com/install.sh | sh  
-sudo tailscale up  
-```
 
 
 
