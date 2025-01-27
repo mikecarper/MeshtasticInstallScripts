@@ -101,12 +101,12 @@ chmod +x ~/meshing-around/install.sh
 ~/meshing-around/install.sh
 sudo /opt/meshing-around/install.sh << EOF
 n
-n
-n
+y
 mesh
 y
 y
 n
+
 n
 EOF
 
@@ -139,7 +139,7 @@ sed -i \
 # Print a message to confirm
 echo "Config file updated successfully."
 
-
+sudo systemctl daemon-reload
 sudo systemctl enable mesh_bot
 sudo systemctl start mesh_bot
 sudo systemctl status mesh_bot
