@@ -57,7 +57,7 @@ function prompt_password {
 #!/bin/bash
 
 # Check for Wi-Fi hardware
-if dmesg | grep -iq "wifi"; then
+if iw dev | grep "wlan"; then
     echo "Wi-Fi hardware detected."
     # Additional commands if Wi-Fi hardware exists
     
