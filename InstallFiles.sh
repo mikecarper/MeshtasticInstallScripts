@@ -119,6 +119,8 @@ source meshtastic-venv/bin/activate
 git clone https://github.com/spudgunman/meshing-around
 chmod +x ~/meshing-around/install.sh
 
+deactivate
+
 ~/meshing-around/install.sh << EOF
 y
 EOF
