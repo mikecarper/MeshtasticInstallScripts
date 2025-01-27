@@ -49,37 +49,48 @@ function prompt_password {
     echo # New line for better readability
 }
 
-sudo nmcli connection show
+#!/bin/bash
 
-# Main script execution wrapped in a y/n question
-while true; do
-    read -p "Do you want to add a new SSID? (y/n): " add_ssid_choice
-    case $add_ssid_choice in
-        [Yy]* )
-            display_wifi_menu
-            select_ssid
-            prompt_password
+# Check for Wi-Fi hardware
+if dmesg | grep -iq "wifi"; then
+    echo "Wi-Fi hardware detected."
+    # Additional commands if Wi-Fi hardware exists
+    
+	sudo nmcli connection show
+	# Main script execution wrapped in a y/n question
+	while true; do
+	    read -p "Do you want to add a new SSID? (y/n): " add_ssid_choice
+	    case $add_ssid_choice in
+	        [Yy]* )
+	            display_wifi_menu
+	            select_ssid
+	            prompt_password
+	
+	            # Attempt to connect to the selected Wi-Fi network
+	            sudo nmcli dev wifi connect "$ssid" password "$wifi_password"
+	
+	            # Check if the connection was successful
+	            if [[ $? -eq 0 ]]; then
+	                echo "Successfully connected to $ssid."
+	            else
+	                echo "Failed to connect to $ssid. Please check the password and try again."
+	            fi
+	            ;;
+	        [Nn]* )
+				break
+	            ;;
+	        * )
+	            echo "Please answer yes or no."
+	            ;;
+	    esac
+	done
+	
+	sudo nmcli connection show
+else
+    echo "No Wi-Fi hardware detected."
+    # Additional commands if Wi-Fi hardware is not found
+fi
 
-            # Attempt to connect to the selected Wi-Fi network
-            sudo nmcli dev wifi connect "$ssid" password "$wifi_password"
-
-            # Check if the connection was successful
-            if [[ $? -eq 0 ]]; then
-                echo "Successfully connected to $ssid."
-            else
-                echo "Failed to connect to $ssid. Please check the password and try again."
-            fi
-            ;;
-        [Nn]* )
-			break
-            ;;
-        * )
-            echo "Please answer yes or no."
-            ;;
-    esac
-done
-
-sudo nmcli connection show
 
 
 cd ~
