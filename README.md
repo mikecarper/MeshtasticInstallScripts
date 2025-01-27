@@ -140,7 +140,11 @@ meshtastic --ch-set uplink_enabled true --ch-index 2
 meshtastic --set mqtt.enabled true
 ```
 
-
+# Disable Bluetooth
+https://meshtastic.org/docs/configuration/radio/bluetooth/#bluetooth-config-client-availability
+```
+meshtastic --set bluetooth.enabled false
+```
 
 
 # Install BBS system.
