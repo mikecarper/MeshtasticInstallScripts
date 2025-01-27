@@ -71,7 +71,7 @@ while true; do
             fi
             ;;
         [Nn]* )
-            echo "You can continue with other tasks or add a new SSID later."
+			break
             ;;
         * )
             echo "Please answer yes or no."
@@ -86,4 +86,61 @@ cd ~
 python3 -m venv meshtastic-venv
 source meshtastic-venv/bin/activate
 pip install --upgrade esptool 
-esptool.py chip_id
+#esptool.py chip_id
+
+cd ~
+source meshtastic-venv/bin/activate
+pip3 install --upgrade pytap2
+pip3 install --upgrade "meshtastic[cli]"
+
+cd ~
+source meshtastic-venv/bin/activate
+git clone https://github.com/spudgunman/meshing-around
+chmod +x ~/meshing-around/install.sh
+
+~/meshing-around/install.sh
+sudo /opt/meshing-around/install.sh << EOF
+n
+n
+n
+mesh
+y
+y
+n
+n
+EOF
+
+sudo chmod -R a+rw /opt/meshing-around/
+
+#!/bin/bash
+
+config_file="/opt/meshing-around/config.ini"
+
+# Ensure the file exists
+if [[ ! -f "$config_file" ]]; then
+    echo "Error: Config file not found at $config_file"
+    exit 1
+fi
+
+# Use sed to update the values in the config file
+sed -i \
+    -e 's/^DadJokesEmoji = False/DadJokesEmoji = True/' \
+    -e 's/^spaceWeather = True/spaceWeather = False/' \
+    -e 's/^wikipedia = True/wikipedia = False/' \
+    -e 's/^SentryEnabled = True/SentryEnabled = False/' \
+    -e 's/^dopeWars = True/dopeWars = False/' \
+    -e 's/^lemonade = True/lemonade = False/' \
+    -e 's/^blackjack = True/blackjack = False/' \
+    -e 's/^videopoker = True/videopoker = False/' \
+    -e 's/^mastermind = True/mastermind = False/' \
+    -e 's/^golfsim = True/golfsim = False/' \
+    "$config_file"
+
+# Print a message to confirm
+echo "Config file updated successfully."
+
+
+sudo systemctl enable mesh_bot
+sudo systemctl start mesh_bot
+sudo systemctl status mesh_bot
+sudo reboot
