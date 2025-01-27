@@ -97,6 +97,10 @@ https://meshtastic.org/docs/software/python/cli/#--setalt-setalt
 ```
 meshtastic --setalt 86 --setlat 47.625127 --setlon -122.1019996
 ```
+https://meshtastic.org/docs/configuration/radio/channels/#setting-position-precision
+```
+meshtastic --ch-set module_settings.position_precision 30 --ch-index 0
+```
 
 
 # Set mode of Device
@@ -114,9 +118,10 @@ https://meshtastic.org/docs/configuration/radio/channels/
 source meshtastic-venv/bin/activate
 meshtastic --ch-add PS-Mesh!
 meshtastic --ch-set psk base64:jHrxpQOq6dEBC5Ldr3ULrQ== --ch-index 1
+meshtastic --ch-set module_settings.position_precision 30 --ch-index 1
 meshtastic --ch-add PS-MQTT! 
 meshtastic --ch-set psk base64:mqttmqttmqttmqttmqttQQ== --ch-index 2
-
+meshtastic --ch-set module_settings.position_precision 30 --ch-index 2
 ```
 
 
