@@ -1,8 +1,16 @@
 Get 64 bit desktop and enable SSH & WiFi from the imager  
 
 # Base pi config
-`sudo raspi-config`  
+```
+sudo raspi-config
+```  
+
 system options -> boot/auto login -> console autologin  
+
+```
+wget https://raw.githubusercontent.com/mikecarper/MeshtasticInstallScripts/refs/heads/main/InstallFiles.sh
+chmod +x InstallFiles.sh
+```
 
 ```
 sudo apt update
