@@ -119,7 +119,10 @@ source meshtastic-venv/bin/activate
 git clone https://github.com/spudgunman/meshing-around
 chmod +x ~/meshing-around/install.sh
 
-~/meshing-around/install.sh
+~/meshing-around/install.sh << EOF
+y
+EOF
+
 sudo /opt/meshing-around/install.sh << EOF
 n
 y
@@ -131,7 +134,10 @@ n
 n
 EOF
 
+echo "linux owmership for bbs"
 sudo chmod -R a+rw /opt/meshing-around/
+sudo usermod -aG plugdev meshbot
+groups meshbot
 
 #!/bin/bash
 
