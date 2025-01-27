@@ -7,7 +7,7 @@ system options -> boot/auto login -> console autologin
 ```
 sudo apt update
 sudo apt -y upgrade
-sudo apt -y install git jq ntp virtualenvwrapper pipx fonts-noto-color-emoji software-properties-common mosquitto mosquitto-clients 
+sudo apt -y install git jq ntp virtualenvwrapper pipx fonts-noto-color-emoji npm software-properties-common mosquitto mosquitto-clients
 
 ```
 
