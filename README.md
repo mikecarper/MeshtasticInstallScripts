@@ -10,6 +10,7 @@ system options -> boot/auto login -> console autologin
 ```
 wget https://raw.githubusercontent.com/mikecarper/MeshtasticInstallScripts/refs/heads/main/InstallFiles.sh
 chmod +x InstallFiles.sh
+./InstallFiles.sh
 ```
 
 ```
