@@ -108,6 +108,7 @@ https://meshtastic.org/docs/configuration/radio/device/#cli
 ```
 meshtastic --set device.role ROUTER_LATE
 meshtastic --set lora.hop_limit 7
+meshtastic --set device.serialEnabled true
 ```
 
 
@@ -139,8 +140,12 @@ meshtastic --set mqtt.tls_enabled false
 meshtastic --set mqtt.root msh/US
 meshtastic --set mqtt.map_reporting_enabled true
 
+meshtastic --ch-set uplink_enabled true --ch-index 0
 meshtastic --ch-set uplink_enabled true --ch-index 1
 meshtastic --ch-set uplink_enabled true --ch-index 2
+
+meshtastic --ch-set downlink_enabled true --ch-index 1
+meshtastic --ch-set downlink_enabled true --ch-index 2
 
 meshtastic --set mqtt.enabled true
 ```
