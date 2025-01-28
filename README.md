@@ -17,7 +17,7 @@ chmod +x InstallFiles.sh
 sudo apt update
 sudo apt -y upgrade
 sudo apt -y install git jq ntp virtualenvwrapper pipx fonts-noto-color-emoji npm software-properties-common mosquitto mosquitto-clients
-
+sudo hostnamectl set-hostname GeoPlace
 ```
 
 
