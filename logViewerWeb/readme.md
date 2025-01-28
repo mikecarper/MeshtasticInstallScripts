@@ -22,8 +22,8 @@ Description=Mesh Logger Web Service
 After=network.target
 
 [Service]
-ExecStart=/usr/bin/node /opt/meshing-around/web-logger/server.js
-WorkingDirectory=/opt/meshing-around/web-logger
+ExecStart=/usr/bin/node /opt/logViewerWeb/server.js
+WorkingDirectory=/opt/logViewerWeb
 Restart=always
 Environment=NODE_ENV=production
 # If you run Node as a specific user, uncomment and adjust:
