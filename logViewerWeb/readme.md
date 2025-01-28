@@ -2,9 +2,18 @@ Make /opt/logViewerWeb folder
 ```
 sudo mkdir /opt/logViewerWeb
 sudo chmod 777 /opt/logViewerWeb
-cd /opt/logViewerWeb
+
 ```
-Copy contents into `/opt/logViewerWeb`.
+
+Copy contents into `/opt/logViewerWeb`
+```
+cd /opt/logViewerWeb
+wget https://raw.githubusercontent.com/mikecarper/MeshtasticInstallScripts/refs/heads/main/logViewerWeb/server.js
+sudo mkdir /opt/logViewerWeb/public
+sudo chmod 777 /opt/logViewerWeb/public
+cd /opt/logViewerWeb/public
+wget https://raw.githubusercontent.com/mikecarper/MeshtasticInstallScripts/refs/heads/main/logViewerWeb/public/index.html
+```
 
 Start node.js project.
 ```
