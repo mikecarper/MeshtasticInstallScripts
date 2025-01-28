@@ -1,9 +1,10 @@
-Copy contents into `/opt/logViewerWeb`.
+Make /opt/logViewerWeb folder
 ```
 sudo mkdir /opt/logViewerWeb
 sudo chmod 777 /opt/logViewerWeb
 cd /opt/logViewerWeb
 ```
+Copy contents into `/opt/logViewerWeb`.
 
 Start node.js project.
 ```
