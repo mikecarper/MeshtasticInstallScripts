@@ -17,6 +17,7 @@ wget https://raw.githubusercontent.com/mikecarper/MeshtasticInstallScripts/refs/
 
 Start node.js project.
 ```
+cd /opt/logViewerWeb
 npm init -y
 npm install express ws chokidar
 ```
