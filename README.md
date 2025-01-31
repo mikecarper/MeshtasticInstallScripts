@@ -16,8 +16,8 @@ chmod +x InstallFiles.sh
 ```
 sudo apt update
 sudo apt -y upgrade
-sudo apt -y install git jq ntp virtualenvwrapper pipx fonts-noto-color-emoji npm software-properties-common mosquitto mosquitto-clients
-sudo hostnamectl set-hostname GeoPlace
+sudo apt -y install git jq ntp virtualenvwrapper pipx fonts-noto-color-emoji npm software-properties-common mosquitto mosquitto-clients python3-poetry socat 
+sudo hostnamectl set-hostname GeoBBS
 ```
 
 
@@ -80,6 +80,28 @@ sudo add-apt-repository ppa:meshtastic/daily
 sudo apt update
 sudo apt install meshtasticd
 ```
+
+
+# Install MeshCat
+https://github.com/Meshtastic-Solutions/MeshCat  
+```
+cd ~
+git clone https://github.com/Meshtastic-Solutions/MeshCat.git
+cd MeshCat
+pipx install meshcatstic
+pipx install uvicorn
+pipx install keyring
+pipx ensurepath
+eval "$(register-python-argcomplete pipx)"
+export PYTHON_KEYRING_BACKEND=keyring.backends.null.Keyring
+sudo poetry install
+```
+
+Setup Service
+```
+
+```
+
 
 # Rename Device
 https://meshtastic.org/docs/software/python/cli/#--set-owner-set_owner
