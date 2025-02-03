@@ -49,9 +49,7 @@ sudo nmcli connection show
 https://meshtastic.org/docs/getting-started/flashing-firmware/esp32/cli-script/  
 ```
 cd ~
-python3 -m venv meshtastic-venv
-source meshtastic-venv/bin/activate
-pip install --upgrade esptool 
+pipx install --upgrade esptool 
 esptool.py chip_id
 ```
 
@@ -70,9 +68,9 @@ chmod +x firmware-selection-g2.sh
 https://meshtastic.org/docs/software/python/cli/installation/  
 ```
 cd ~
-source meshtastic-venv/bin/activate
-pip3 install --upgrade pytap2
-pip3 install --upgrade "meshtastic[cli]"
+sudo pip3 install --upgrade pyserial --break-system-packages
+sudo pip3 install --upgrade pytap2 --break-system-packages
+pipx install --upgrade "meshtastic[cli]"
 ```
 OR if not on raspberry pi os 
 ```
