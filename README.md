@@ -57,7 +57,7 @@ sudo nmcli connection show
 https://meshtastic.org/docs/getting-started/flashing-firmware/esp32/cli-script/  
 ```
 cd ~
-pipx install --upgrade esptool 
+pipx install esptool 
 esptool.py chip_id
 ```
 
@@ -79,7 +79,7 @@ https://meshtastic.org/docs/software/python/cli/installation/
 cd ~
 sudo pip3 install --upgrade pyserial --break-system-packages
 sudo pip3 install --upgrade pytap2 --break-system-packages
-pipx install --upgrade "meshtastic[cli]"
+pipx install "meshtastic[cli]"
 ```
 OR if not on raspberry pi os 
 ```
