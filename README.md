@@ -16,18 +16,26 @@ chmod +x InstallFiles.sh
 ```
 sudo apt update
 sudo apt -y upgrade
-sudo apt -y install git jq ntp virtualenvwrapper pipx fonts-noto-color-emoji npm software-properties-common mosquitto mosquitto-clients python3-poetry socat nmap 
+sudo apt -y install git jq ntp virtualenvwrapper pipx fonts-noto-color-emoji npm software-properties-common mosquitto mosquitto-clients python3-poetry socat nmap iptables-persistent 
 sudo hostnamectl set-hostname GeoBBS
 ```
 
 
-# Install VPN
+# Install tailscale VPN
 100 devices on the free tier  
 https://login.tailscale.com/admin/  
 ```
 curl -fsSL https://tailscale.com/install.sh | sh  
 curl -fsSL https://tailscale.com/install.sh | sh  
 sudo tailscale up  
+```
+
+# Port forward node to PI's IP over talescale
+```
+cd ~
+sudo wget -O /usr/local/bin/setup_forwarding.sh https://raw.githubusercontent.com/mikecarper/MeshtasticInstallScripts/main/PortForwardingNode.sh
+sudo chmod +x /usr/local/bin/setup_forwarding.sh
+/usr/local/bin/setup_forwarding.sh
 ```
 
 
@@ -64,6 +72,7 @@ chmod +x firmware-selection-g2.sh
 
 
 
+
 # Install Meshtastic CLI  
 https://meshtastic.org/docs/software/python/cli/installation/  
 ```
@@ -80,25 +89,7 @@ sudo apt install meshtasticd
 ```
 
 
-# Install MeshCat
-https://github.com/Meshtastic-Solutions/MeshCat  
-```
-cd ~
-git clone https://github.com/Meshtastic-Solutions/MeshCat.git
-cd MeshCat
-pipx install meshcatstic
-pipx install uvicorn
-pipx install keyring
-pipx ensurepath
-eval "$(register-python-argcomplete pipx)"
-export PYTHON_KEYRING_BACKEND=keyring.backends.null.Keyring
-sudo poetry install
-```
 
-Setup Service
-```
-
-```
 
 
 # Rename Device
