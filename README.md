@@ -224,7 +224,31 @@ sed -i "s/HTTPServer(('127\.0\.0\.1',/HTTPServer(('${IP}',/g" /opt/meshing-aroun
 
 Run as a service that starts automatically. 
 ```
+sudo nano /etc/systemd/system/meshbotweblog.service
+```
+
+Put this into that file and save
+```
+[Unit]
+Description=Meshing Around Web Service
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/meshing-around/modules
+ExecStart=/usr/bin/python3 /opt/meshing-around/modules/web.py
+Restart=on-failure
+User=mikec
+
+[Install]
+WantedBy=multi-user.target
 
 ```
 
-
+Enable the service
+```
+sudo systemctl daemon-reload
+sudo systemctl enable meshbotweblog.service
+sudo systemctl start meshbotweblog.service
+sudo systemctl status meshbotweblog.service
+```
