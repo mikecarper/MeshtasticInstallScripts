@@ -24,7 +24,7 @@ npm install express ws chokidar
 
 Create a service.
 ```
-sudo nano /etc/systemd/system/mesh-logger.service
+sudo nano /etc/systemd/system/meshbotlivelogviewer.service
 ```
 Copy this below into the above service file.
 ```
@@ -48,6 +48,7 @@ WantedBy=multi-user.target
 Enable the service.
 ```
 sudo systemctl daemon-reload
-sudo systemctl enable mesh-logger
-sudo systemctl start mesh-logger
+sudo systemctl enable meshbotlivelogviewer
+sudo systemctl start meshbotlivelogviewer
+sudo systemctl status meshbotlivelogviewer
 ```
