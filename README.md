@@ -238,7 +238,7 @@ Type=simple
 WorkingDirectory=/opt/meshing-around/modules
 ExecStart=/usr/bin/python3 /opt/meshing-around/modules/web.py
 Restart=on-failure
-User=mikec
+User=root
 
 [Install]
 WantedBy=multi-user.target
