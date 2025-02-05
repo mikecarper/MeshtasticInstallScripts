@@ -195,14 +195,14 @@ Update html every 5 min
 ```
 #!/bin/bash
 
-CRON_JOB="*/5 * * * * /opt/meshing-around/launch.sh html5"
+NEWCRONJOB="*/5 * * * * /opt/meshing-around/launch.sh html5"
 
 # Check if the cron job is already present; if not, add it.
-if crontab -l 2>/dev/null | grep -Fq "$CRON_JOB"; then
+if crontab -l 2>/dev/null | grep -Fq "$NEWCRONJOB"; then
     echo "Cron job already exists."
 else
     # Append the cron job to the existing crontab entries.
-    (crontab -l 2>/dev/null; echo "$CRON_JOB") | crontab -
+    (crontab -l 2>/dev/null; echo "$NEWCRONJOB") | crontab -
     echo "Cron job added."
 fi
 ```
