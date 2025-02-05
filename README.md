@@ -128,7 +128,6 @@ meshtastic --set device.serialEnabled true
 https://pugetmesh.org/meshtastic/config/#ps-mqtt-channel  
 https://meshtastic.org/docs/configuration/radio/channels/
 ```
-source meshtastic-venv/bin/activate
 meshtastic --ch-add PS-Mesh!
 meshtastic --ch-set psk base64:jHrxpQOq6dEBC5Ldr3ULrQ== --ch-index 1
 meshtastic --ch-set module_settings.position_precision 17 --ch-index 1
@@ -174,7 +173,6 @@ https://github.com/SpudGunMan/meshing-around
 
 ```
 cd ~
-source meshtastic-venv/bin/activate
 git clone https://github.com/spudgunman/meshing-around
 cd meshing-around/
 ./install.sh
@@ -229,9 +227,4 @@ Run as a service that starts automatically.
 
 ```
 
-
-# Exit meshtastic-venv
-```
-deactivate
-```
 
