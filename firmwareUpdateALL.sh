@@ -28,6 +28,43 @@ DOWNLOAD_DIR="${PWD_SCRIPT}/firmware_downloads"  # Current working directory for
 FIRMWARE_ROOT="${PWD_SCRIPT}/firmware"
 CACHE_FILE="${FIRMWARE_ROOT}/meshtastic_firmware_releases.json"
 
+# Initialize variables
+VERSION_ARG=""
+OPERATION_ARG=""
+RUN_UPDATE=false
+
+# Process command-line arguments
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --version)
+            shift
+            VERSION_ARG="$1"
+            ;;
+        --install)
+            if [ -n "$OPERATION_ARG" ] && [ "$OPERATION_ARG" != "install" ]; then
+                echo "Error: Conflicting options specified."
+                exit 1
+            fi
+            OPERATION_ARG="install"
+            ;;
+        --update)
+            if [ -n "$OPERATION_ARG" ] && [ "$OPERATION_ARG" != "update" ]; then
+                echo "Error: Conflicting options specified."
+                exit 1
+            fi
+            OPERATION_ARG="update"
+            ;;
+        --run)
+            RUN_UPDATE=true
+            ;;
+        *)
+            echo "Unknown option: $1"
+            exit 1
+            ;;
+    esac
+    shift
+done
+
 # Function: Check internet connectivity
 check_internet() {
     if ping -c1 -W2 api.github.com > /dev/null 2>&1; then
@@ -39,7 +76,7 @@ check_internet() {
 
 normalize() {
   # Remove dashes, underscores, and spaces, then convert to lowercase
-  echo "$1" | sed 's/[-_ ]//g' | tr '[:upper:]' '[:lower:]'
+  echo "$1" | tr '[:upper:]' '[:lower:]' | tr -d '[:blank:]' | tr -d '-' | tr -d '_'
 }
 
 
@@ -48,7 +85,7 @@ update_cache() {
     if check_internet; then
         if [ ! -f "$CACHE_FILE" ] || [ "$(date +%s)" -ge "$(( $(stat -c %Y "$CACHE_FILE") + CACHE_TIMEOUT_SECONDS ))" ]; then
 			#read -p "Press enter to continue"
-			mkdir -p $FIRMWARE_ROOT
+			mkdir -p "$FIRMWARE_ROOT"
             echo "Updating release cache from GitHub..."
             curl -s "$GITHUB_API_URL" -o "$CACHE_FILE"
         else
@@ -72,14 +109,14 @@ releases_json=$(cat "$CACHE_FILE")
 # Build a list of release versions (using tag names) with labels (append (alpha), etc)
 declare -a versions_tags=()
 declare -a versions_labels=()
-echo "Parsing Release JSON data"
+echo -n "Parsing JSON; "
 mapfile -t release_items < <(echo "$releases_json" | jq -c '.[]')
 if [ ${#release_items[@]} -eq 0 ]; then
     echo "No releases found. Exiting."
     exit 1
 fi
 
-echo "Building Release JSON menu"
+echo -n "Building Menu"
 for item in "${release_items[@]}"; do
     tag=$(echo "$item" | jq -r '.tag_name')
     prerelease=$(echo "$item" | jq -r '.prerelease')
@@ -101,28 +138,52 @@ for item in "${release_items[@]}"; do
     [ -n "$suffix" ] && label="$label $suffix"
     versions_tags+=("$tag")
     versions_labels+=("$label")
+	echo -n "."
 done
-
 echo ""
-echo "Available firmware release versions:"
-select chosen_release in "${versions_labels[@]}"; do
-  if [[ -n "$chosen_release" ]]; then
-    echo "You selected: $chosen_release"
-    break
-  else
-    echo "Invalid selection. Please choose a number."
-  fi
-done
 
-chosen_index=$((REPLY - 1))
+# Auto-select based on the --version argument if provided.
+if [ -n "$VERSION_ARG" ]; then
+    auto_selected=""
+    for i in "${!versions_tags[@]}"; do
+        # Check if the version tag contains the provided version argument.
+        if [[ "${versions_tags[$i]}" == *${VERSION_ARG}* ]]; then
+            auto_selected="${versions_labels[$i]}"
+            chosen_index=$i
+            #echo "Auto-selected firmware release: ${versions_tags[$i]} (${versions_labels[$i]})"
+            break
+        fi
+    done
+    if [ -z "$auto_selected" ]; then
+        echo "No release version found matching --version $VERSION_ARG"
+        exit 1
+    fi
+    chosen_release="$auto_selected"
+else
+	echo ""
+    # Otherwise, present the interactive menu.
+    echo "Available firmware release versions:"
+    select chosen_release in "${versions_labels[@]}"; do
+        if [[ -n "$chosen_release" ]]; then
+            chosen_index=$((REPLY - 1))
+            break
+        else
+            echo "Invalid selection. Please choose a number."
+        fi
+    done
+fi
+
+# Continue with the rest of the script using $chosen_release.
+echo "You selected: $chosen_release"
+
 chosen_tag="${versions_tags[$chosen_index]}"
-echo "Chosen release version: $chosen_tag"
+#echo "Chosen release version tag: $chosen_tag"
 
 # For the chosen release, get all assets whose name starts with "firmware-" and ends with the version string.
 # For example, look for filenames like: firmware-<product>-<versionSuffix>.zip
 # Assume version string appears in the filename after a dash.
 download_pattern="-${chosen_tag}"
-echo "Searching for firmware assets for release $chosen_tag..."
+#echo "Searching for firmware assets for release $chosen_tag..."
 mapfile -t assets < <(
   echo "$releases_json" | jq -r --arg TAG "$chosen_tag" '
     .[] | select(.tag_name==$TAG) | .assets[] |
@@ -138,25 +199,37 @@ fi
 
 # For each asset, check if the file has been downloaded.
 # Download any missing firmware assets.
-mkdir -p $DOWNLOAD_DIR
-echo ""
+mkdir -p "$DOWNLOAD_DIR"
+StreamOutput=0
 for asset in "${assets[@]}"; do
     decoded=$(echo "$asset" | base64 --decode)
     asset_name=$(echo "$decoded" | jq -r '.name')
     asset_url=$(echo "$decoded" | jq -r '.url')
     local_file="${DOWNLOAD_DIR}/${asset_name}"
     if [ -f "$local_file" ]; then
-        echo "Firmware asset $asset_name already downloaded."
+		if [ $StreamOutput -eq 0 ]
+		then
+			echo -n "Already downloaded $asset_name "
+			StreamOutput=1
+		else
+			echo -n "$asset_name "
+		fi
+		
     else
-        echo "Downloading firmware asset $asset_name to $local_file ..."
+		if [ $StreamOutput -eq 1 ]
+		then
+			echo ""
+		fi
+        echo "Downloading $asset_name to $local_file ..."
         curl -sSL -o "$local_file" "$asset_url"
         #echo "Downloaded $asset_name."
     fi
 done
+echo ""
 
 # Unzip each firmware asset into folder structure: firmware/<release_version>/<product>/
-echo ""
 echo "Unzipping firmware assets..."
+StreamOutput=0
 for asset in "${assets[@]}"; do
     decoded=$(echo "$asset" | base64 --decode)
     asset_name=$(echo "$decoded" | jq -r '.name')
@@ -164,31 +237,45 @@ for asset in "${assets[@]}"; do
     # Expect filename format: firmware-<product>-<versionSuffix>.zip
     if [[ "$asset_name" =~ ^firmware-([^-\ ]+)-(.+)\.zip$ ]]; then
         product="${BASH_REMATCH[1]}"
-        version_suffix="${BASH_REMATCH[2]}"
+        #version_suffix="${BASH_REMATCH[2]}"
         # Create folder: firmware/<chosen_tag>/<product>/
         target_dir="${FIRMWARE_ROOT}/${chosen_tag}/${product}"
         mkdir -p "$target_dir"
         if [ -z "$(ls -A "$target_dir" 2>/dev/null)" ]; then
+			if [ $StreamOutput -eq 1 ]
+			then
+				echo ""
+			fi
             echo "Unzipping $asset_name into $target_dir ..."
             unzip -o "$local_file" -d "$target_dir"
+			StreamOutput=0
         else
-            echo "Files already exist in $target_dir; skipping unzip for $asset_name."
+			if [ $StreamOutput -eq 0 ]
+			then
+				echo -n "Files already exist for $asset_name "
+				StreamOutput=1
+			else
+				echo -n "$asset_name "
+			fi
         fi
     else
         echo "Asset $asset_name does not match expected naming convention. Skipping unzip."
     fi
 done
+echo ""
 
 
 # Search all firmware/<chosen_tag> for files matching:
 # filenames starting with "firmware-" and ending with "$download_pattern.zip"
 # Extract the product name from the middle of the filename.
 # Remove the "v" from download_pattern for filename matching.
-pattern_without_v=$(echo "$download_pattern" | sed 's/v//g')
+pattern_without_v="${download_pattern//v/}"
 
-echo ""
-echo "Scanning extracted firmware for matching products..."
+
+#echo ""
+#echo "Scanning extracted firmware for matching products..."
 declare -A product_files
+declare -A product_files_full
 # Search under the extracted folder for the chosen release.
 while IFS= read -r -d '' file; do
     fname=$(basename "$file")
@@ -199,36 +286,83 @@ while IFS= read -r -d '' file; do
     if [[ "$fname" =~ ^firmware-(.*)${pattern_without_v}(-update)?\.(bin|uf2|hex|zip)$ ]]; then
         prod="${BASH_REMATCH[1]}"
         # Remove any trailing dashes, underscores, or spaces.
-        prod=$(echo "$prod" | sed 's/[-_ ]*$//')
-        product_files["$prod"]+="$file"$'\n'
+		prodNorm=$(normalize "$prod")
+        product_files["$prodNorm"]+="$file"$'\n'
+		product_files_full["$prodNorm"]+="$prod"$'\n'
     fi
 done < <(find "$FIRMWARE_ROOT/${chosen_tag}" -type f -iname "firmware-*" -print0)
 
 # Now detect the connected device via lsusb.
 echo ""
-echo "Detecting connected device via lsusb..."
-lsusb_output=$(lsusb)
-# Extract the device description (everything after the ID field).
-detected_raw=$(echo "$lsusb_output" | sed -n 's/.*ID [0-9a-fA-F]\{4\}:[0-9a-fA-F]\{4\} //p' | head -n1)
-# Extract the last two words from the description, which usually represent the product.
-detected_product=$(echo "$detected_raw" | awk '{print $(NF-1), $NF}')
-# Normalize the extracted product string.
-detected_product=$(normalize "$detected_product")
-if [ -z "$detected_product" ]; then
-    echo "Could not detect device product via lsusb. Exiting."
-    exit 1
-fi
-echo "Detected product (normalized): $detected_product"
+#echo "Detecting connected device via lsusb..."
 
-echo ""
-echo "Matching firmware products with detected device product..."
+# Get the lsusb output.
+lsusb_output=$(lsusb)
+
+# Extract the device description (everything after the "ID ..." field)
+mapfile -t all_device_lines < <(echo "$lsusb_output" | sed -n 's/.*ID [0-9a-fA-F]\{4\}:[0-9a-fA-F]\{4\} //p')
+
+# Filter out lines that contain "hub" (case-insensitive).
+filtered_device_lines=()
+for line in "${all_device_lines[@]}"; do
+    if ! echo "$line" | grep -qi "hub"; then
+        filtered_device_lines+=("$line")
+    fi
+done
+
+# If filtering out "hub" devices yields no matches, fall back to using all devices.
+if [ "${#filtered_device_lines[@]}" -eq 0 ]; then
+    filtered_device_lines=("${all_device_lines[@]}")
+fi
+
+# Determine which device to use.
+if [ "${#filtered_device_lines[@]}" -eq 0 ]; then
+    echo "No matching USB devices found."
+    detected_product=""
+    exit 1
+elif [ "${#filtered_device_lines[@]}" -eq 1 ]; then
+    # Only one match: select it.
+    detected_raw="${filtered_device_lines[0]}"
+else
+    # More than one match: present a menu for the user to choose.
+    echo "Multiple USB devices detected:"
+    for idx in "${!filtered_device_lines[@]}"; do
+        printf "%d) %s\n" $((idx+1)) "${filtered_device_lines[$idx]}"
+    done
+
+    # Loop until a valid selection is made.
+    while true; do
+        read -rp "Please select a device [1-${#filtered_device_lines[@]}]: " selection
+        if [[ "$selection" =~ ^[1-9][0-9]*$ ]] && [ "$selection" -ge 1 ] && [ "$selection" -le "${#filtered_device_lines[@]}" ]; then
+            detected_raw="${filtered_device_lines[$((selection-1))]}"
+            break
+        else
+            echo "Invalid selection. Try again."
+        fi
+    done
+fi
+
+echo "Found: $detected_raw"
+# Normalize the product string.
+detected_product=$(normalize "$detected_raw")
+
+# Show the final detected product.
+#echo "Detected product: $detected_product"
+
+
+#echo ""
+#echo "Matching firmware products with detected device product..."
 matching_keys=()
 for prod in "${!product_files[@]}"; do
     norm_prod=$(normalize "$prod")
+	#echo "${detected_product} ${norm_prod}"
     # Check if the normalized product matches the detected product.
     # This uses a substring match in either direction.
+	#echo "${detected_product}" | grep "$norm_prod"
     if [[ "$norm_prod" == *"$detected_product"* ]] || [[ "$detected_product" == *"$norm_prod"* ]]; then
-        echo "Product match: $prod (normalized: $norm_prod)"
+		ProdFile=$( echo "${product_files_full[$prod]}" | head -n1 )
+        echo "Firmware file match on: $ProdFile"
+		
         matching_keys+=("$prod")
     #else
         #echo "No match for: $prod (normalized: $norm_prod) against detected: $detected_product"
@@ -247,13 +381,56 @@ IFS=$'\n' read -r -d '' -a matching_files < <(
 if [ ${#matching_files[@]} -eq 0 ]; then
     echo "No firmware files match the detected product ($detected_product). Exiting."
     exit 1
-elif [ ${#matching_files[@]} -eq 1 ]; then
+fi
+
+
+# Set operation from command-line argument if provided; otherwise prompt interactively.
+if [ -n "$OPERATION_ARG" ]; then
+    operation="$OPERATION_ARG"
+else
+    # Ask whether to update or install (default is update)
+    read -r -p "Do you want to (u)pdate [default] or (i)nstall? [u/i]: " op_choice
+    op_choice=${op_choice:-u}
+    if [[ "$op_choice" =~ ^[Ii] ]]; then
+        operation="install"
+    else
+        operation="update"
+    fi
+fi
+echo "Operation chosen: $operation"
+
+# Filter matching files based on the operation
+if [[ "$operation" == "update" ]]; then
+    # Prioritize files ending with '-update.*' for update operation
+    update_files=()
+    other_files=()
+    for file in "${matching_files[@]}"; do
+        if [[ "$file" == *-update.* ]]; then
+            update_files+=("$file")
+        else
+            other_files+=("$file")
+        fi
+    done
+    # Use update files if available, otherwise fall back to other files
+    if [[ ${#update_files[@]} -gt 0 ]]; then
+        matching_files=("${update_files[@]}")
+    else
+        matching_files=("${other_files[@]}")
+    fi
+fi
+
+if [ ${#matching_files[@]} -eq 1 ]; then
     selected_file="${matching_files[0]}"
-    echo "One matching firmware file found: $selected_file"
+    #echo "One matching firmware file found: $selected_file"
 else
     echo "Multiple matching firmware files found:"
     for i in "${!matching_files[@]}"; do
-        echo "$((i+1)). ${matching_files[$i]}"
+		selected_file="${matching_files[$i]}"
+		# Extract the part before and after the last slash
+		before_last_slash="${selected_file%/*}"
+		before_last_slash="${before_last_slash##*/}"
+		after_last_slash="${selected_file##*/}"
+        echo "$((i+1)). ${before_last_slash}/${after_last_slash}"
     done
     read -r -p "Select which firmware file to use [1-${#matching_files[@]}]: " file_choice
     if ! [[ "$file_choice" =~ ^[0-9]+$ ]] || [ "$file_choice" -lt 1 ] || [ "$file_choice" -gt "${#matching_files[@]}" ]; then
@@ -267,15 +444,6 @@ echo ""
 echo "Selected firmware file for operation: $selected_file"
 
 
-# Ask whether to update or install (default is update)
-read -r -p "Do you want to (u)pdate [default] or (i)nstall? [u/i]: " op_choice
-op_choice=${op_choice:-u}
-if [[ "$op_choice" =~ ^[Ii] ]]; then
-  operation="install"
-else
-  operation="update"
-fi
-echo "Operation chosen: $operation"
 
 # Determine the script to run based on the operation.
 if [ "$operation" = "update" ]; then
@@ -287,7 +455,7 @@ fi
 # If the firmware file is for ESP32 (filename contains "esp32"), then modify the update script baud rate.
 if echo "$selected_file" | grep -qi "esp32"; then
     if [ -f "$script_to_run" ]; then
-        echo "Modifying baud rate in $(basename "$script_to_run") for ESP32 firmware..."
+        #echo "Modifying baud rate in $(basename "$script_to_run") for ESP32 firmware..."
         sed -i 's/--baud 115200/--baud 1200/g' "$script_to_run"
     else
         echo "No $(basename "$script_to_run") found in $(dirname "$selected_file"). Skipping baud rate change."
@@ -310,3 +478,44 @@ cmd="$abs_script -f $abs_selected"
 echo ""
 echo "Command to run for firmware ${operation}:"
 echo "$cmd"
+
+# Determine whether to run the update script
+if $RUN_UPDATE; then
+    user_choice="y"
+else
+    # Prompt the user to run the update script or exit, defaulting to exit.
+    read -r -p "Would you like to run the update script? (y/N): " user_choice
+    user_choice=${user_choice:-N}
+fi
+
+if [[ "$user_choice" =~ ^[Yy]$ ]]; then
+	# Determine the correct esptool command to use
+	if "$PYTHON" -m esptool version >/dev/null 2>&1; then
+		ESPTOOL_CMD="$PYTHON -m esptool"
+	elif command -v esptool >/dev/null 2>&1; then
+		ESPTOOL_CMD="esptool"
+	elif command -v esptool.py >/dev/null 2>&1; then
+		ESPTOOL_CMD="esptool.py"
+	else
+		# Check if 'pipx' is installed
+		if command -v pipx &> /dev/null; then
+			echo "pipx is installed."
+			# Proceed with operations that require pipx
+		else
+			sudo apt -y install pipx
+			echo "pipx is not installed."
+			# Handle the absence of pipx, e.g., prompt for installation
+		fi
+		pipx install esptool 
+		ESPTOOL_CMD="esptool.py"
+	fi
+
+	$ESPTOOL_CMD --baud 1200  chip_id
+
+    echo "Running the update script..."
+    # Execute the script with the firmware file as an argument.
+    "$abs_script" -f "$abs_selected"
+	exit 0
+else
+    exit 0
+fi
