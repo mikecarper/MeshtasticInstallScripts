@@ -252,3 +252,7 @@ sudo systemctl enable meshbotweblog.service
 sudo systemctl start meshbotweblog.service
 sudo systemctl status meshbotweblog.service
 ```
+
+# Enable the live log viewer
+Follow the directions found here
+https://github.com/mikecarper/MeshtasticInstallScripts/blob/main/logViewerWeb/readme.md
