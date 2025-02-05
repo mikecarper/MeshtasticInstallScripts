@@ -28,6 +28,20 @@ DOWNLOAD_DIR="${PWD_SCRIPT}/firmware_downloads"  # Current working directory for
 FIRMWARE_ROOT="${PWD_SCRIPT}/firmware"
 CACHE_FILE="${FIRMWARE_ROOT}/meshtastic_firmware_releases.json"
 
+# Function to display help
+show_help() {
+    echo "Usage: $(basename "$0") [OPTIONS]"
+    echo
+    echo "Options:"
+    echo "  --version VERSION   Specify the version to use."
+    echo "  --install           Set the operation to 'install'."
+    echo "  --update            Set the operation to 'update'."
+    echo "  --run               Automatically run the update script without prompting."
+    echo "  -h, --help          Display this help message and exit."
+    echo
+    exit 0
+}
+
 # Initialize variables
 VERSION_ARG=""
 OPERATION_ARG=""
@@ -57,9 +71,12 @@ while [[ $# -gt 0 ]]; do
         --run)
             RUN_UPDATE=true
             ;;
+        -h|--help)
+            show_help
+            ;;
         *)
             echo "Unknown option: $1"
-            exit 1
+            show_help
             ;;
     esac
     shift
@@ -389,7 +406,7 @@ if [ -n "$OPERATION_ARG" ]; then
     operation="$OPERATION_ARG"
 else
     # Ask whether to update or install (default is update)
-    read -r -p "Do you want to (u)pdate [default] or (i)nstall? [u/i]: " op_choice
+    read -r -p "Do you want to (u)pdate [default] or (i)nstall? [U/i]: " op_choice
     op_choice=${op_choice:-u}
     if [[ "$op_choice" =~ ^[Ii] ]]; then
         operation="install"
@@ -438,12 +455,8 @@ else
         exit 1
     fi
     selected_file="${matching_files[$((file_choice-1))]}"
+	echo "Selected firmware file for operation: $selected_file"
 fi
-
-echo ""
-echo "Selected firmware file for operation: $selected_file"
-
-
 
 # Determine the script to run based on the operation.
 if [ "$operation" = "update" ]; then
