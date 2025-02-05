@@ -301,7 +301,7 @@ while IFS= read -r -d '' file; do
     # Use a regex that captures everything between "firmware-" and the pattern_without_v.
     # This regex is greedy, so it will capture all characters up to the last occurrence of pattern_without_v.
     # Then we trim any trailing dash/underscore/space.
-    if [[ "$fname" =~ ^firmware-(.*)${pattern_without_v}(-update)?\.(bin|uf2|hex|zip)$ ]]; then
+    if [[ "$fname" =~ ^firmware-(.*)${pattern_without_v}(-update)?\.(bin|uf2|zip)$ ]]; then
         prod="${BASH_REMATCH[1]}"
         # Remove any trailing dashes, underscores, or spaces.
 		prodNorm=$(normalize "$prod")
@@ -397,8 +397,29 @@ IFS=$'\n' read -r -d '' -a matching_files < <(
 )
 
 if [ ${#matching_files[@]} -eq 0 ]; then
-    echo "No firmware files match the detected product ($detected_product). Exiting."
-    exit 1
+
+	USBproduct=$(lsusb -v 2>/dev/null \
+    | grep "iProduct" \
+    | grep -vi "Controller" \
+    | sed -n 's/.*2[[:space:]]\+\([^[:space:]]\+\).*/\1/p' \
+    | head -n 1 \
+    | tr '[:upper:]' '[:lower:]')
+	
+	echo "Doing a deep search for $USBproduct in $FIRMWARE_ROOT/${chosen_tag}/*"
+	# Capture all matching file paths (each on a new line)
+	found_files=$(grep -aFrin --exclude="*-ota.zip" "$USBproduct" "$FIRMWARE_ROOT/${chosen_tag}" | cut -d: -f1)
+
+	if [ -z "$found_files" ]; then
+		echo "No firmware files match the detected product ($detected_product) ($USBproduct). Exiting."
+		exit 1
+	fi
+	
+	# Populate matching_files array with all found file paths.
+	IFS=$'\n' read -r -d '' -a matching_files < <(
+		echo "$found_files"
+		printf '\0'
+	)
+
 fi
 
 
