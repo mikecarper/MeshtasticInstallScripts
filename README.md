@@ -192,6 +192,43 @@ Do you want to install the emoji font for debian/ubuntu linux? (y/n)y
 Do you want to install the LLM Ollama components? (y/n)n  
 
 
+# Setup log viewer
+Update html every 5 min
+```
+#!/bin/bash
+
+CRON_JOB="*/5 * * * * /opt/meshing-around/launch.sh html5"
+
+# Check if the cron job is already present; if not, add it.
+if crontab -l 2>/dev/null | grep -Fq "$CRON_JOB"; then
+    echo "Cron job already exists."
+else
+    # Append the cron job to the existing crontab entries.
+    (crontab -l 2>/dev/null; echo "$CRON_JOB") | crontab -
+    echo "Cron job added."
+fi
+```
+
+Set the IP to bind to
+```
+#!/bin/bash
+# Get IP from tailscale; if empty then use hostname -I
+IP=$(tailscale ip 2>/dev/null | head -n1)
+if [ -z "$IP" ]; then
+    IP=$(hostname -I | awk '{print $1}')
+fi
+
+echo "Using IP: $IP"
+
+# Replace "('127.0.0.1'," with "('$IP'," in /opt/meshing-around/modules/web.py
+sed -i "s/HTTPServer(('127\.0\.0\.1',/HTTPServer(('${IP}',/g" /opt/meshing-around/modules/web.py
+```
+
+Run as a service that starts automatically. 
+```
+
+```
+
 
 # Exit meshtastic-venv
 ```
