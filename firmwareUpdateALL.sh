@@ -116,7 +116,8 @@ update_cache() {
 
 get_locked_service() {
     # Accept an optional argument for the device; default to /dev/ttyACM0.
-    local device_name="${1:-/dev/ttyACM0}"
+    #local device_name="${1:-/dev/ttyACM0}"
+	local device_name="/dev/ttyACM0"
     #echo "Device: $device_name"
     
     # Get all users locking the device (skip the header line)
@@ -134,7 +135,7 @@ get_locked_service() {
     #echo "PIDs: $pids"
     
     local found_service=""
-    local last_pid=""
+    #local last_pid=""
     for pid in $pids; do
         #echo "PID: $pid"
         
@@ -161,7 +162,7 @@ get_locked_service() {
         if [ "$service" != "None" ]; then
             found_service="$found_service $service"
         fi
-        last_pid="$pid"
+        #last_pid="$pid"
     done
     
     #if [ -n "$found_service" ] && [ "$found_service" != "None" ]; then
@@ -632,7 +633,7 @@ if [[ "$user_choice" =~ ^[Yy]$ ]]; then
 		pipx install "meshtastic[cli]"
 	fi
 	
-	lockedService=$(get_locked_service)
+	lockedService=$( get_locked_service )
 	if [ -n "$lockedService" ] && [ "$lockedService" != "None" ]; then
 		read -rp "A service ($lockedService) is locking the port. Would you like to stop it? (y/N): " answer
 		answer=${answer:-N}
