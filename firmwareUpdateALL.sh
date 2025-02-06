@@ -114,6 +114,66 @@ update_cache() {
     fi
 }
 
+get_locked_service() {
+    # Accept an optional argument for the device; default to /dev/ttyACM0.
+    local device_name="${1:-/dev/ttyACM0}"
+    #echo "Device: $device_name"
+    
+    # Get all users locking the device (skip the header line)
+    local users
+    users=$(sudo lsof "$device_name" | awk 'NR>1 {print $3}' | sort -u)
+    if [ -z "$users" ]; then
+        #echo "No process found locking ${device_name}."
+        return 0
+    fi
+    #echo "User(s): $users"
+    
+    # For each user, get all their PIDs.
+    local pids
+    pids=$(ps -u "$users" -o pid= | tr -s ' ' | tr '\n' ' ')
+    #echo "PIDs: $pids"
+    
+    local found_service=""
+    local last_pid=""
+    for pid in $pids; do
+        #echo "PID: $pid"
+        
+        # Get the full command line for the process.
+        local cmd
+        cmd=$(ps -p "$pid" -o cmd= | awk '{$1=$1};1')
+        #echo "Command: $cmd"
+
+        # Search for a systemd service file referencing the executable.
+        # Using || true so that grep failing does not exit the script.
+        local raw_service
+        raw_service=$( { sudo grep -sR "$cmd" /etc/systemd/system/ 2>/dev/null || true; } | awk -F: '{print $1}' | sort -u )
+        #echo "Raw service info: $raw_service"
+        
+        local service
+        if [ -n "$raw_service" ]; then
+            service=$(echo "$raw_service" | xargs -n1 basename | sort -u)
+        else
+            service="None"
+        fi
+        #echo "Service: $service"
+        
+        # If a service file was found, store it.
+        if [ "$service" != "None" ]; then
+            found_service="$found_service $service"
+        fi
+        last_pid="$pid"
+    done
+    
+    #if [ -n "$found_service" ] && [ "$found_service" != "None" ]; then
+    #    echo "Service locking $device_name: $found_service"
+    #else
+    #    echo "Found matching process(es), but no systemd service file was identified."
+    #    echo "Last checked PID: $last_pid"
+    #    return 1
+    #fi
+	echo "$found_service" | awk '{$1=$1};1'
+}
+
 update_cache
 
 # Load release data
@@ -524,6 +584,35 @@ else
 fi
 
 if [[ "$user_choice" =~ ^[Yy]$ ]]; then
+	# Initialize PYTHON as empty.
+	PYTHON=""
+
+	# Loop over candidate Python executables and pick the first one found.
+	for candidate in python3 python; do
+		if command -v "$candidate" >/dev/null 2>&1; then
+			PYTHON=$(command -v "$candidate")
+			break
+		fi
+	done
+
+	# If no Python interpreter is found, install python3.
+	if [ -z "$PYTHON" ]; then
+		echo "No Python interpreter found. Installing python3..."
+		sudo apt update && sudo apt install -y python3 pipx
+		PYTHON=$(command -v python3) || { echo "Failed to install python3"; exit 1; }
+	fi
+	#echo "Using Python interpreter: $PYTHON"
+
+	# Check if 'pipx' is installed
+	if command -v pipx &> /dev/null; then
+		echo "pipx is installed."
+		# Proceed with operations that require pipx
+	else
+		sudo apt -y install pipx
+		echo "pipx is not installed."
+		# Handle the absence of pipx, e.g., prompt for installation
+	fi
+
 	# Determine the correct esptool command to use
 	if "$PYTHON" -m esptool version >/dev/null 2>&1; then
 		ESPTOOL_CMD="$PYTHON -m esptool"
@@ -532,25 +621,78 @@ if [[ "$user_choice" =~ ^[Yy]$ ]]; then
 	elif command -v esptool.py >/dev/null 2>&1; then
 		ESPTOOL_CMD="esptool.py"
 	else
-		# Check if 'pipx' is installed
-		if command -v pipx &> /dev/null; then
-			echo "pipx is installed."
-			# Proceed with operations that require pipx
-		else
-			sudo apt -y install pipx
-			echo "pipx is not installed."
-			# Handle the absence of pipx, e.g., prompt for installation
-		fi
 		pipx install esptool 
 		ESPTOOL_CMD="esptool.py"
 	fi
+	
+	if command -v pipx &> /dev/null; then
+		echo "meshtastic is installed."
+	else
+		echo "meshtastic is not installed. Installing now..."
+		pipx install "meshtastic[cli]"
+	fi
+	
+	lockedService=$(get_locked_service)
+	if [ -n "$lockedService" ] && [ "$lockedService" != "None" ]; then
+		read -rp "A service ($lockedService) is locking the port. Would you like to stop it? (y/N): " answer
+		answer=${answer:-N}
+		if [[ "$answer" =~ ^[Yy]$ ]]; then
+			echo "Stopping service $lockedService..."
+			sudo systemctl stop "$lockedService"
+		else
+			echo "Service not stopped. Firmware update might fail."
+		fi
+	fi
+	
+	if [[ "${abs_selected,,}" == *"nrf52840"* ]]; then
+		echo "Device is nrf52840 so booting into DFU mode"
+		old_output=$(sudo blkid -c /dev/null)
+		#echo "$old_output"
+		
+		meshtastic --enter-dfu || true
+		sleep 5
+		
+		new_output=$(sudo blkid -c /dev/null)
+		#echo "$new_output"
 
-	$ESPTOOL_CMD --baud 1200  chip_id
+		while IFS= read -r line; do
+			if ! grep -Fxq "$line" <<< "$old_output"; then
+				device_id=$(echo "$line" | awk '{print $1}' | tr -d ':')
+				
+			fi
+		done <<< "$new_output"
+		
+		# Define the mount point (you can adjust this as needed)
+		mount_point="/mnt/nrf52840"
+		
+		# Check if the device is already mounted by looking in /proc/mounts.
+		if grep -q "^$device_id " /proc/mounts; then
+			echo "$device_id is already mounted."
+		else
+			echo "$device_id is not mounted. Mounting now..."
+			sudo mkdir -p "$mount_point"
+			sudo mount "$device_id" "$mount_point"
+		fi
+		
+		#echo "Contents of $mount_point:"
+		#ls -alih "$mount_point"
+		
+		sudo cp -v "$abs_selected" "$mount_point/"
 
-    echo "Running the update script..."
-    # Execute the script with the firmware file as an argument.
-    "$abs_script" -f "$abs_selected"
+		echo "Firmware update done"
+	else
+		echo "Device is ESP chip so connecting at 1200 baud to put it into update mode."
+		$ESPTOOL_CMD --baud 1200 chip_id
+		sleep 5
+		
+		echo "Running the update script..."
+		# Execute the script with the firmware file as an argument.
+		"$abs_script" -f "$abs_selected"
+		
+		echo "Firmware update done"
+	fi
 	exit 0
 else
+	echo "Script done"
     exit 0
 fi
