@@ -18,6 +18,9 @@
 
 set -euo pipefail
 
+# Trap errors and output the file and line number.
+trap 'echo "Error occurred in ${BASH_SOURCE[0]} at line ${LINENO}"' ERR
+
 # Configuration
 REPO_OWNER="meshtastic"
 REPO_NAME="firmware"
