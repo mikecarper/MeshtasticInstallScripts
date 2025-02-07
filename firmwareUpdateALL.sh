@@ -88,7 +88,8 @@ done
 
 # Function: Check internet connectivity
 check_internet() {
-    if ping -c1 -W2 api.github.com > /dev/null 2>&1; then
+	domain=$(echo $GITHUB_API_URL | sed -E 's|https?://([^/]+)/.*|\1|')
+    if ping -c1 -W2 "$domain" > /dev/null 2>&1; then
         return 0
     else
         return 1
@@ -119,8 +120,8 @@ update_cache() {
 
 get_locked_service() {
     # Accept an optional argument for the device; default to /dev/ttyACM0.
-    #local device_name="${1:-/dev/ttyACM0}"
-	local device_name="/dev/ttyACM0"
+    local device_name="${1:-/dev/ttyACM0}"
+	#local device_name="/dev/ttyACM0"
     #echo "Device: $device_name"
     
     # Get all users locking the device (skip the header line)
@@ -414,7 +415,7 @@ else
 
     # Loop until a valid selection is made.
     while true; do
-        read -rp "Please select a device [1-${#filtered_device_lines[@]}]: " selection
+        read -r -p "Please select a device [1-${#filtered_device_lines[@]}]: " selection
         if [[ "$selection" =~ ^[1-9][0-9]*$ ]] && [ "$selection" -ge 1 ] && [ "$selection" -le "${#filtered_device_lines[@]}" ]; then
             detected_raw="${filtered_device_lines[$((selection-1))]}"
             break
@@ -424,7 +425,33 @@ else
     done
 fi
 
-echo "Found: $detected_raw"
+# Find the full lsusb line for the chosen device.
+detected_line=$(echo "$lsusb_output" | grep -i "$detected_raw" | head -n1)
+
+# Try to match using the full description (spaces replaced with underscores).
+search_full=$(echo "$detected_raw" | tr ' ' '_')
+detected_dev=""
+for link in /dev/serial/by-id/*; do
+    if [[ $(basename "$link") == *"$search_full"* ]]; then
+        detected_dev=$(readlink -f "$link")
+        break
+    fi
+done
+
+# If not found, try matching with the description minus its first word.
+if [ -z "$detected_dev" ]; then
+    fallback=$(echo "$detected_raw" | cut -d' ' -f2- | tr ' ' '_')
+    for link in /dev/serial/by-id/*; do
+        if [[ $(basename "$link") == *"$fallback"* ]]; then
+            detected_dev=$(readlink -f "$link")
+            break
+        fi
+    done
+fi
+
+# Output the result.
+echo "$detected_line -> $detected_dev"
+
 # Normalize the product string.
 detected_product=$(normalize "$detected_raw")
 
@@ -587,116 +614,119 @@ else
     user_choice=${user_choice:-N}
 fi
 
-if [[ "$user_choice" =~ ^[Yy]$ ]]; then
-	# Initialize PYTHON as empty.
-	PYTHON=""
-
-	# Loop over candidate Python executables and pick the first one found.
-	for candidate in python3 python; do
-		if command -v "$candidate" >/dev/null 2>&1; then
-			PYTHON=$(command -v "$candidate")
-			break
-		fi
-	done
-
-	# If no Python interpreter is found, install python3.
-	if [ -z "$PYTHON" ]; then
-		echo "No Python interpreter found. Installing python3..."
-		sudo apt update && sudo apt install -y python3 pipx
-		PYTHON=$(command -v python3) || { echo "Failed to install python3"; exit 1; }
-	fi
-	#echo "Using Python interpreter: $PYTHON"
-
-	# Check if 'pipx' is installed
-	if command -v pipx &> /dev/null; then
-		echo "pipx is installed."
-		# Proceed with operations that require pipx
-	else
-		sudo apt -y install pipx
-		echo "pipx is not installed."
-		# Handle the absence of pipx, e.g., prompt for installation
-	fi
-
-	# Determine the correct esptool command to use
-	if "$PYTHON" -m esptool version >/dev/null 2>&1; then
-		ESPTOOL_CMD="$PYTHON -m esptool"
-	elif command -v esptool >/dev/null 2>&1; then
-		ESPTOOL_CMD="esptool"
-	elif command -v esptool.py >/dev/null 2>&1; then
-		ESPTOOL_CMD="esptool.py"
-	else
-		pipx install esptool 
-		ESPTOOL_CMD="esptool.py"
-	fi
-	
-	if command -v pipx &> /dev/null; then
-		echo "meshtastic is installed."
-	else
-		echo "meshtastic is not installed. Installing now..."
-		pipx install "meshtastic[cli]"
-	fi
-	
-	lockedService=$( get_locked_service )
-	if [ -n "$lockedService" ] && [ "$lockedService" != "None" ]; then
-		read -rp "A service ($lockedService) is locking the port. Would you like to stop it? (y/N): " answer
-		answer=${answer:-N}
-		if [[ "$answer" =~ ^[Yy]$ ]]; then
-			echo "Stopping service $lockedService..."
-			sudo systemctl stop "$lockedService"
-		else
-			echo "Service not stopped. Firmware update might fail."
-		fi
-	fi
-	
-	if [[ "${abs_selected,,}" == *"nrf52840"* ]]; then
-		echo "Device is nrf52840 so booting into DFU mode"
-		old_output=$(sudo blkid -c /dev/null)
-		#echo "$old_output"
-		
-		meshtastic --enter-dfu || true
-		sleep 5
-		
-		new_output=$(sudo blkid -c /dev/null)
-		#echo "$new_output"
-
-		while IFS= read -r line; do
-			if ! grep -Fxq "$line" <<< "$old_output"; then
-				device_id=$(echo "$line" | awk '{print $1}' | tr -d ':')
-				
-			fi
-		done <<< "$new_output"
-		
-		# Define the mount point (you can adjust this as needed)
-		mount_point="/mnt/nrf52840"
-		
-		# Check if the device is already mounted by looking in /proc/mounts.
-		if grep -q "^$device_id " /proc/mounts; then
-			echo "$device_id is already mounted."
-		else
-			echo "$device_id is not mounted. Mounting now..."
-			sudo mkdir -p "$mount_point"
-			sudo mount "$device_id" "$mount_point"
-		fi
-		
-		#echo "Contents of $mount_point:"
-		#ls -alih "$mount_point"
-		
-		sudo cp -v "$abs_selected" "$mount_point/"
-
-		echo "Firmware update done"
-	else
-		echo "Device is ESP chip so connecting at 1200 baud to put it into update mode."
-		$ESPTOOL_CMD --baud 1200 chip_id
-		sleep 5
-		
-		echo "Running the update script..."
-		# Execute the script with the firmware file as an argument.
-		"$abs_script" -f "$abs_selected"
-		
-		echo "Firmware update done"
-	fi
-	exit 0
-else
-	echo "Script done"
+# Early exit if the user does not answer yes.
+if ! [[ "$user_choice" =~ ^[Yy]$ ]]; then
+    echo "Script done"
     exit 0
+fi
+
+
+
+
+# Initialize PYTHON as empty.
+PYTHON=""
+
+# Loop over candidate Python executables and pick the first one found.
+for candidate in python3 python; do
+	if command -v "$candidate" >/dev/null 2>&1; then
+		PYTHON=$(command -v "$candidate")
+		break
+	fi
+done
+
+# If no Python interpreter is found, install python3.
+if [ -z "$PYTHON" ]; then
+	echo "No Python interpreter found. Installing python3..."
+	sudo apt update && sudo apt install -y python3 pipx
+	PYTHON=$(command -v python3) || { echo "Failed to install python3"; exit 1; }
+fi
+#echo "Using Python interpreter: $PYTHON"
+
+# Check if 'pipx' is installed
+if command -v pipx &> /dev/null; then
+	echo "pipx is installed."
+	# Proceed with operations that require pipx
+else
+	sudo apt -y install pipx
+	echo "pipx is not installed."
+	# Handle the absence of pipx, e.g., prompt for installation
+fi
+
+# Determine the correct esptool command to use
+if "$PYTHON" -m esptool version >/dev/null 2>&1; then
+	ESPTOOL_CMD="$PYTHON -m esptool"
+elif command -v esptool >/dev/null 2>&1; then
+	ESPTOOL_CMD="esptool"
+elif command -v esptool.py >/dev/null 2>&1; then
+	ESPTOOL_CMD="esptool.py"
+else
+	pipx install esptool 
+	ESPTOOL_CMD="esptool.py"
+fi
+
+if command -v pipx &> /dev/null; then
+	echo "meshtastic is installed."
+else
+	echo "meshtastic is not installed. Installing now..."
+	pipx install "meshtastic[cli]"
+fi
+
+lockedService=$( get_locked_service "$detected_dev" )
+if [ -n "$lockedService" ] && [ "$lockedService" != "None" ]; then
+	echo "Stopping service $lockedService..."
+	sudo systemctl stop "$lockedService"
+fi
+
+if [[ "${abs_selected,,}" != esp32* ]]; then
+	# code for non-esp32 devices
+	echo "Device is a non-esp32 device so booting into DFU mode"
+	old_output=$(sudo blkid -c /dev/null)
+	#echo "$old_output"
+	
+	meshtastic --enter-dfu || true
+	sleep 5
+	
+	new_output=$(sudo blkid -c /dev/null)
+	#echo "$new_output"
+
+	while IFS= read -r line; do
+		if ! grep -Fxq "$line" <<< "$old_output"; then
+			device_id=$(echo "$line" | awk '{print $1}' | tr -d ':')
+			
+		fi
+	done <<< "$new_output"
+	
+	# Define the mount point (you can adjust this as needed)
+	mount_point="/mnt/meshDeviceSD"
+	
+	# Check if the device is already mounted by looking in /proc/mounts.
+	if grep -q "^$device_id " /proc/mounts; then
+		echo "$device_id is already mounted."
+	else
+		echo "$device_id is not mounted. Mounting now..."
+		sudo mkdir -p "$mount_point"
+		sudo mount "$device_id" "$mount_point"
+	fi
+	
+	#echo "Contents of $mount_point:"
+	#ls -alih "$mount_point"
+	
+	sudo cp -v "$abs_selected" "$mount_point/"
+
+	echo "Firmware update done"
+else
+	echo "Device is ESP chip so connecting at 1200 baud to put it into update mode."
+	$ESPTOOL_CMD --baud 1200 chip_id
+	sleep 5
+	
+	echo "Running the update script..."
+	# Execute the script with the firmware file as an argument.
+	"$abs_script" -f "$abs_selected"
+	
+	echo "Firmware update done"
+fi
+
+if [ -n "$lockedService" ] && [ "$lockedService" != "None" ]; then
+	echo "Starting service $lockedService..."
+	sudo systemctl start "$lockedService"
 fi
