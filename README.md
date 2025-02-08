@@ -121,6 +121,7 @@ https://meshtastic.org/docs/configuration/module/serial/#serial-module-config-cl
 meshtastic --set device.role ROUTER_LATE
 meshtastic --set lora.hop_limit 7
 meshtastic --set device.serialEnabled true
+meshtastic --set display.screenOnSecs 5
 ```
 
 
