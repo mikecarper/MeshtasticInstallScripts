@@ -16,7 +16,7 @@ chmod +x InstallFiles.sh
 ```
 sudo apt update
 sudo apt -y upgrade
-sudo apt -y install git jq ntp virtualenvwrapper pipx fonts-noto-color-emoji npm software-properties-common mosquitto mosquitto-clients python3-poetry socat nmap iptables-persistent shellcheck 
+sudo apt -y install git jq ntp virtualenvwrapper pipx fonts-noto-color-emoji npm software-properties-common mosquitto mosquitto-clients python3-poetry socat nmap iptables-persistent shellcheck python3-rpi.gpio 
 sudo hostnamectl set-hostname GeoBBS
 ```
 
