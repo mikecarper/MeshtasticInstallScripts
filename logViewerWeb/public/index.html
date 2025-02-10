@@ -25,6 +25,7 @@
       white-space: pre-wrap;
       overflow-y: auto;
       max-height: 70vh;
+      cursor: pointer;
     }
   </style>
 </head>
@@ -42,7 +43,62 @@
     const fileSelector = document.getElementById("fileSelector");
     const logOutput = document.getElementById("logOutput");
 
-    // 1) Fetch the list of files from /api/files
+    let ws; // Global WebSocket variable
+
+    // Function to auto-select the first file that isn't named "readme" (any extension, any case)
+    function autoSelectFirstNonReadme() {
+      const readmePattern = /^readme(\..+)?$/i;
+      // Start at index 1 to skip the placeholder option.
+      for (let i = 1; i < fileSelector.options.length; i++) {
+        let option = fileSelector.options[i];
+        if (!readmePattern.test(option.value)) {
+          fileSelector.selectedIndex = i;
+          return;
+        }
+      }
+      // If all files are readme, no auto-selection is performed.
+    }
+
+    // Helper function that subscribes to the currently selected file
+    function subscribeToFile() {
+      const fileName = fileSelector.value;
+      if (fileName && ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({ action: "subscribe", file: fileName }));
+        logOutput.textContent = `Subscribed to ${fileName}. Waiting for log data...`;
+      }
+    }
+
+    // Function to create (or recreate) the WebSocket connection
+    function connect() {
+      ws = new WebSocket(`ws://${location.host}`);
+
+      ws.onopen = () => {
+        console.log("WebSocket connected");
+        // Auto-select the first non-readme file if none is selected yet.
+        if (!fileSelector.value) {
+          autoSelectFirstNonReadme();
+        }
+        subscribeToFile();
+      };
+
+      ws.onmessage = (event) => {
+        // Expecting JSON with { file: fileName, content: "..." }
+        const data = JSON.parse(event.data);
+        logOutput.textContent = data.content;
+        logOutput.scrollTop = logOutput.scrollHeight; // auto-scroll
+      };
+
+      ws.onclose = () => {
+        console.log("WebSocket closed");
+        logOutput.textContent =
+          "Connection closed. Click here or focus the window to reconnect.";
+      };
+    }
+
+    // When the user changes the file selection, subscribe to that file
+    fileSelector.addEventListener("change", subscribeToFile);
+
+    // 1) Fetch the list of files from /api/files and populate the dropdown.
     fetch("/api/files")
       .then((res) => res.json())
       .then((data) => {
@@ -52,37 +108,33 @@
           opt.textContent = file;
           fileSelector.appendChild(opt);
         });
+        // If no file is selected, auto-select the first non-readme file.
+        if (!fileSelector.value) {
+          autoSelectFirstNonReadme();
+          if (ws && ws.readyState === WebSocket.OPEN) {
+            subscribeToFile();
+          }
+        }
       })
       .catch((err) => console.error("Error fetching file list:", err));
 
-    // 2) Open a single WebSocket to the server
-    const ws = new WebSocket(`ws://${location.host}`);
+    // 2) Establish the initial WebSocket connection.
+    connect();
 
-    ws.onopen = () => {
-      console.log("WebSocket connected");
-    };
+    // 3) Auto reconnect if the connection is closed:
+    //    a) On window focus.
+    window.addEventListener("focus", () => {
+      if (!ws || (ws.readyState !== WebSocket.OPEN && ws.readyState !== WebSocket.CONNECTING)) {
+        console.log("Attempting to reconnect on window focus...");
+        connect();
+      }
+    });
 
-    ws.onmessage = (event) => {
-      // The server sends JSON with { file: fileName, content: "..." }
-      const data = JSON.parse(event.data);
-      logOutput.textContent = data.content;
-      logOutput.scrollTop = logOutput.scrollHeight; // auto-scroll
-    };
-
-    ws.onclose = () => {
-      console.log("WebSocket closed");
-      logOutput.textContent = "Connection closed. Reload to reconnect.";
-    };
-
-    // 3) When user picks a file, tell the server to subscribe
-    fileSelector.addEventListener("change", () => {
-      const fileName = fileSelector.value;
-      if (fileName) {
-        // Ask the server to subscribe us to that file
-        ws.send(JSON.stringify({ action: "subscribe", file: fileName }));
-        logOutput.textContent = `Subscribed to ${fileName}. Waiting for log data...`;
-      } else {
-        logOutput.textContent = "No file selected.";
+    //    b) On clicking the log output (the reconnect message is clickable).
+    logOutput.addEventListener("click", () => {
+      if (!ws || (ws.readyState !== WebSocket.OPEN && ws.readyState !== WebSocket.CONNECTING)) {
+        console.log("Attempting to reconnect on log output click...");
+        connect();
       }
     });
   </script>
