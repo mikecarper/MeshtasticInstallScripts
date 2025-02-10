@@ -50,18 +50,6 @@ sudo nmcli connection show
 ```
 
 
-
-
-
-# Install firmware update tools
-https://meshtastic.org/docs/getting-started/flashing-firmware/esp32/cli-script/  
-```
-cd ~
-pipx install esptool 
-esptool.py chip_id
-```
-
-
 # Update firmware on the g2
 https://github.com/mikecarper/meshfirmware
 ```
