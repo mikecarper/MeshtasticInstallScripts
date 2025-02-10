@@ -62,12 +62,14 @@ esptool.py chip_id
 ```
 
 
-# Select the firmware for the g2
+# Update firmware on the g2
+https://github.com/mikecarper/meshfirmware
 ```
 cd ~
-wget https://raw.githubusercontent.com/mikecarper/MeshtasticInstallScripts/refs/heads/main/firmware-selection-g2.sh
-chmod +x firmware-selection-g2.sh
-./firmware-selection-g2.sh
+git clone https://github.com/mikecarper/meshfirmware.git
+cd meshfirmware
+chmod +x firmware.sh
+./firmware.sh
 ```
 
 
