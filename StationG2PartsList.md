@@ -7,6 +7,9 @@ https://wiki.uniteng.com/en/meshtastic/station-g2
 10PCS JST ZH1.5 ZH 1.5mm Wire Cable Connector - Color: 10CM - Connector Type: Single head - Pins: 10P: $2.84 (extra sensors)  
 https://www.aliexpress.us/item/3256807090715570.html
 
+INA219 Current Power Monitoring Sensor: $1.20  
+https://www.aliexpress.us/item/3256807347261583.html
+
 # Solar
 MPPT Solar Panel Charge Controller: $4.02  
 https://www.aliexpress.us/item/3256801527569707.html
@@ -28,7 +31,7 @@ USB-C To Micro USB OTG Cable - 0.3m: $1.07
 https://www.aliexpress.us/item/3256805895539256.html
 
 ## OR
-Orange Pi Zero 3: $14.90   
+Orange Pi Zero 3: $19.43  
 https://www.aliexpress.us/item/3256805599380429.html
 
 #### Power
