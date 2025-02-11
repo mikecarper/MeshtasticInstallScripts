@@ -59,6 +59,8 @@ USB Type C Male/Female 4 Pin Repair Cable - Color: Female 4 Pin Type-C - Length:
 USB Type C Male/Female 4 Pin Repair Cable - Color: Male 4 Pin Type-C - Length: 0.25m: $0.98  
 https://www.aliexpress.us/item/3256807325908380.html
 
+Jumper Wire 40PCS female to female - 40cm: $4.63 (cut in half)  
+https://www.aliexpress.us/item/3256801814340687.html
 
 # Antenna
 ALFA Network AOA-915-5ACM 5 dbi Omni Outdoor 915MHz 802.11ah Mini Antenna for LoRa HaLow Application: $16.97  
