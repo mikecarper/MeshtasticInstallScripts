@@ -53,7 +53,7 @@ https://shop.airframes.io/products/lora-915mhz-filter
 https://www.aliexpress.us/item/3256806295592966.html
 
 # Computer
-Raspberry Pi Zero 2W with Header: $18.00  
+Raspberry Pi Zero 2W with [Header](https://raspberrypi.stackexchange.com/questions/83610/gpio-pinout-orientation-raspberypi-zero-w): $18.00  
 https://www.adafruit.com/product/6008  
 
 #### Power
