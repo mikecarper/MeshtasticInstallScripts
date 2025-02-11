@@ -52,16 +52,25 @@ https://www.aliexpress.us/item/3256807325908380.html
 ALFA Network AOA-915-5ACM 5 dbi Omni Outdoor 915MHz 802.11ah Mini Antenna for LoRa HaLow Application: $16.97  
 https://www.amazon.com/dp/B08H8J6ZV6
 
+N Female To SMA Male Pigtail - Color: SMAJ-NK - Pins: 15cm: $2.87  
+https://www.aliexpress.us/item/3256806028983835.html
+
 ## OR
 
 10 dBi Rokland Backcountry Rural N-Male Omni Outdoor Helium 915 MHz Antenna 45" for RAK Nebra Bobcat SenseCAP M1 Hotspots: $49.97  
 https://store.rokland.com/collections/802-11ah-wi-fi-halow/products/10-dbi-backcountry-n-male-omni-outdoor-helium-915-mhz-antenna-48-for-rak-miner-2-nebra-indoor-bobcat-hotspots
+
+N Female To SMA Male Pigtail - Color: SMAJ-NK - Pins: 50cm: $3.36  
+https://www.aliexpress.us/item/3256806028983835.html
 
 Antenna Mount Kit: $15.88  
 https://www.amazon.com/dp/B0CTG49ZLR
 
 Meshtastic LoRa 906.875mhz Cavity Filter: $120.00  
 https://shop.airframes.io/products/lora-915mhz-filter
+
+5Pcs SMA Male Plug to SMA Male Plug 4 inch Jumper Cable: $4.69
+https://www.aliexpress.us/item/3256806295592966.html
 
 # Extra things
 
