@@ -11,7 +11,7 @@ https://www.aliexpress.us/item/3256807090715570.html
 MPPT Solar Panel Charge Controller: $4.02  
 https://www.aliexpress.us/item/3256801527569707.html
 
-20 Watt Solar Panel; 1.1A 18.2V
+20 Watt Solar Panel; 1.1A 18.2V: $19.99  
 https://www.amazon.com/dp/B0D8BCBW54
 
 
