@@ -17,7 +17,7 @@ https://batteryhookup.com/collections/more-featured-products/products/new-12-8v-
 12.8v 100Ah LiFePO4: $150  
 https://hqsolarpower.com/12v-100ah-lifepo4-lithium-iron-phosphate-battery/
 
-(optional) Large Fireproof Lipo Bag for 100Ah Lithium Battery Storage and Charging: $24
+(optional) Large Fireproof Lipo Bag for 100Ah Lithium Battery Storage and Charging: $24  
 https://www.amazon.com/FLASLD-Fireproof-Waterproof-Documents-Valuables/dp/B0B1VV2CBD
 
 # Solar
