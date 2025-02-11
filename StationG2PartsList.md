@@ -2,12 +2,14 @@
 Station G2: $109.00  
 https://wiki.uniteng.com/en/meshtastic/station-g2
 
-10PCS JST ZH1.5 ZH 1.5mm Wire Cable Connector - Color: 10CM - Connector Type: Single head - Pins: 5P: $1.70 (power)  
-10PCS JST ZH1.5 ZH 1.5mm Wire Cable Connector - Color: 10CM - Connector Type: Single head - Pins: 10P: $2.84 (extra sensors)  
+10PCS JST ZH 1.5mm Wire Connector - Color: 10CM - Connector Type: Single head - Pins: 5P: $1.70 (power)  
 https://www.aliexpress.us/item/3256807090715570.html
 
-INA219 Current Power Monitoring Sensor: $1.20  
-https://www.aliexpress.us/item/3256807347261583.html
+10PCS JST SH 1.0mm Wire Connector - Color: 4P - Package: 100mm - Pins: Same direction: $1.17 (voltage sensor)  
+https://www.aliexpress.us/item/3256807031812901.html
+
+INA219 Current Power Monitoring Sensor - Color: Solder: $1.46  
+https://www.aliexpress.us/item/2255800037132313.html
 
 # Battery
 12.8v 30Ah Lifepo4: $55  
