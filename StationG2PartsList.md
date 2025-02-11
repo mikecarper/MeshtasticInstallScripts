@@ -103,6 +103,9 @@ https://www.homedepot.com/p/Cerrowire-75-ft-16-2-Black-Stranded-Low-Voltage-Land
 WAGO 221 Lever Nuts 35pc Compact Splicing Wire Connector Assortment with Case: $24.95  
 https://www.amazon.com/dp/B0BRBPSM9Q
 
+LT-211 Lever Wire Connector 28-12 AWG - Color: 20PCS: $3.10  
+https://www.aliexpress.us/item/3256805876997520.html
+
 
 # Total Cost
-$ 313.11 5db - $585.16 10db + Cavity Filter
+$ 313.11 low - $585.16 high
