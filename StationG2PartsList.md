@@ -78,7 +78,7 @@ https://www.amazon.com/dp/B0CTG49ZLR
 Meshtastic LoRa 906.875mhz Cavity Filter: $120.00  
 https://shop.airframes.io/products/lora-915mhz-filter
 
-5Pcs SMA Male Plug to SMA Male Plug 4 inch Jumper Cable: $4.69
+5Pcs SMA Male Plug to SMA Male Plug 4 inch Jumper Cable: $4.69  
 https://www.aliexpress.us/item/3256806295592966.html
 
 # Extra things
