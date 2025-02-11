@@ -9,13 +9,20 @@ https://www.aliexpress.us/item/3256807090715570.html
 INA219 Current Power Monitoring Sensor: $1.20  
 https://www.aliexpress.us/item/3256807347261583.html
 
+# Battery
+12.8v 30Ah Lifepo4: $55  
+https://batteryhookup.com/collections/more-featured-products/products/new-12-8v-30ah-lifepo4-battery-series-12-24-36-48v
+
+## OR
+12.8v 100Ah LiFePO4: $150  
+https://hqsolarpower.com/12v-100ah-lifepo4-lithium-iron-phosphate-battery/
+
 # Solar
 MPPT Solar Panel Charge Controller: $4.02  
 https://www.aliexpress.us/item/3256801527569707.html
 
 20 Watt Solar Panel; 1.1A 18.2V: $19.99  
 https://www.amazon.com/dp/B0D8BCBW54
-
 
 # Computer
 Raspberry Pi Zero 2W with Header: $18.00  
@@ -90,4 +97,4 @@ https://www.amazon.com/dp/B0BRBPSM9Q
 
 
 # Total Cost
-$ 263.11 5db - $435.16 10db + Cavity Filter
+$ 313.11 5db - $585.16 10db + Cavity Filter
