@@ -1,8 +1,7 @@
-# Radio
+# Radio + Cables + Voltage Sensor
 Station G2: $109.00  
 https://wiki.uniteng.com/en/meshtastic/station-g2
 
-#### Cables for radio
 10PCS JST ZH1.5 ZH 1.5mm Wire Cable Connector - Color: 10CM - Connector Type: Single head - Pins: 5P: $1.70 (power)  
 10PCS JST ZH1.5 ZH 1.5mm Wire Cable Connector - Color: 10CM - Connector Type: Single head - Pins: 10P: $2.84 (extra sensors)  
 https://www.aliexpress.us/item/3256807090715570.html
