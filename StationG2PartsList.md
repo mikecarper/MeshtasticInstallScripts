@@ -11,6 +11,10 @@ https://www.aliexpress.us/item/3256807031812901.html
 INA219 Current Power Monitoring Sensor - Color: Solder: $1.46  
 https://www.aliexpress.us/item/2255800037132313.html
 
+90 degree USB C connector - Color: CM-CG CW: $1.40  
+https://www.aliexpress.us/item/3256807615869192.html
+
+
 # Battery
 12.8v 30Ah Lifepo4: $55  
 https://batteryhookup.com/collections/more-featured-products/products/new-12-8v-30ah-lifepo4-battery-series-12-24-36-48v
