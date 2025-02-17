@@ -103,8 +103,8 @@ https://www.homedepot.com/p/Cerrowire-75-ft-16-2-Black-Stranded-Low-Voltage-Land
 WAGO 221 Lever Nuts 35pc Compact Splicing Wire Connector Assortment with Case: $24.95  
 https://www.amazon.com/dp/B0BRBPSM9Q
 
-LT-211 Lever Wire Connector 28-12 AWG - Color: 20PCS: $3.10  
-https://www.aliexpress.us/item/3256805876997520.html
+100PCS Network Cable Wire Splice Connector - Color: K1 CONNECTOR: $2.39  
+https://www.aliexpress.us/item/3256807159122776.html
 
 
 # Total Cost
