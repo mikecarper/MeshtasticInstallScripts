@@ -16,7 +16,7 @@ chmod +x InstallFiles.sh
 ```
 sudo apt update
 sudo apt -y upgrade
-sudo apt -y install git jq ntp virtualenvwrapper pipx fonts-noto-color-emoji npm software-properties-common mosquitto mosquitto-clients python3-poetry socat nmap iptables-persistent shellcheck python3-rpi.gpio screen shfmt 
+sudo apt -y install git jq ntp virtualenvwrapper pipx fonts-noto-color-emoji npm software-properties-common mosquitto mosquitto-clients python3-poetry socat nmap iptables-persistent shellcheck python3-rpi.gpio screen shfmt i2c-tools 
 sudo hostnamectl set-hostname GeoBBS
 ```
 
@@ -243,6 +243,12 @@ sudo systemctl enable meshbotweblog.service
 sudo systemctl start meshbotweblog.service
 sudo systemctl status meshbotweblog.service
 ```
+
+# Enable voltage mon
+```
+pipx install adafruit-circuitpython-ina219 --include-deps
+```
+
 
 # Enable the live log viewer
 Follow the directions found here
