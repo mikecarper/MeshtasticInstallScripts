@@ -247,6 +247,7 @@ sudo systemctl status meshbotweblog.service
 # Enable voltage mon
 ```
 pipx install adafruit-circuitpython-ina219 --include-deps
+pipx install adafruit-blinka --include-deps
 ```
 ![image](https://github.com/user-attachments/assets/ff1bc429-6b1b-420e-bb95-386846212242)
 
