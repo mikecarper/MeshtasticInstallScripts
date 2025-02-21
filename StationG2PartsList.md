@@ -83,7 +83,7 @@ Type A to C Cable - Cable Length: 0.3m: $1.09
 https://www.aliexpress.us/item/3256805782706642.html
 
 # Remote Power Switch
-Relay Module with optocoupler - Size: 2 channel 5V: $1.71  
+Relay Module with optocoupler - Size: 4 channel 5V: $2.83  
 https://www.aliexpress.us/item/2261799814354583.html
 
 USB Type C Male/Female 4 Pin Repair Cable - Color: Male 4 Pin Type-C - Length: 0.25m: $0.98  
