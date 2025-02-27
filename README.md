@@ -251,6 +251,20 @@ pipx install adafruit-blinka --include-deps
 ```
 ![image](https://github.com/user-attachments/assets/ff1bc429-6b1b-420e-bb95-386846212242)
 
+# MeshSense
+```
+git clone --recurse-submodules https://github.com/Affirmatech/MeshSense.git
+cd MeshSense
+
+latestTag=$(git tag --sort=-v:refname | head -n 1)
+git checkout "$latestTag"
+
+cd api/webbluetooth
+npm i
+npm run build:all
+cd ../..
+```
+
 
 
 # Enable the live log viewer
