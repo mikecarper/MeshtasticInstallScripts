@@ -253,16 +253,10 @@ pipx install adafruit-blinka --include-deps
 
 # MeshSense
 ```
-git clone --recurse-submodules https://github.com/Affirmatech/MeshSense.git
-cd MeshSense
-
-latestTag=$(git tag --sort=-v:refname | grep -Ev 'alpha|beta' | head -n 1)
-git checkout "$latestTag"
-
-cd api/webbluetooth
-npm i
-npm run build:all
-cd ../..
+wget https://affirmatech.com/download/meshsense/meshsense-beta-arm64.AppImage
+eval $(gnome-keyring-daemon --start --components=secrets)
+export GNOME_KEYRING_CONTROL
+dbus-run-session xvfb-run ./meshsense-beta-arm64.AppImage --headless --disable-gpu
 ```
 
 
