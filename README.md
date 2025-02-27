@@ -256,7 +256,7 @@ pipx install adafruit-blinka --include-deps
 git clone --recurse-submodules https://github.com/Affirmatech/MeshSense.git
 cd MeshSense
 
-latestTag=$(git tag --sort=-v:refname | head -n 1)
+latestTag=$(git tag --sort=-v:refname | grep -Ev 'alpha|beta' | head -n 1)
 git checkout "$latestTag"
 
 cd api/webbluetooth
