@@ -1,4 +1,15 @@
-Get 64 bit desktop and enable SSH & WiFi from the imager  
+Get 64 bit NO desktop and enable SSH & WiFi from the imager  
+![image](https://github.com/user-attachments/assets/4dd1930d-e6aa-48f1-bb71-81a2b70225d8)
+
+
+# Install tailscale VPN
+100 devices on the free tier  
+https://login.tailscale.com/admin/  
+```
+curl -fsSL https://tailscale.com/install.sh | sh  
+curl -fsSL https://tailscale.com/install.sh | sh  
+sudo tailscale up  
+```
 
 # Base pi config
 ```
@@ -20,15 +31,6 @@ sudo apt -y install git jq ntp virtualenvwrapper pipx fonts-noto-color-emoji npm
 sudo hostnamectl set-hostname GeoBBS
 ```
 
-
-# Install tailscale VPN
-100 devices on the free tier  
-https://login.tailscale.com/admin/  
-```
-curl -fsSL https://tailscale.com/install.sh | sh  
-curl -fsSL https://tailscale.com/install.sh | sh  
-sudo tailscale up  
-```
 
 # Port forward node to PI's IP over talescale
 ```
