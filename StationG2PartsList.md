@@ -5,7 +5,7 @@ https://wiki.uniteng.com/en/meshtastic/station-g2
 10PCS JST ZH 1.5mm Wire Connector - Color: 10CM - Connector Type: Single head - Pins: 5P: $1.70 (power)  
 https://www.aliexpress.us/item/3256807090715570.html
 
-OPTIONAL - 10PCS JST SH 1.0mm Wire Connector - Color: 4P - Package: 100mm - Pins: Same direction: $1.17 (voltage sensor)  
+OPTIONAL - 10PCS JST SH 1.0mm Wire Connector - Color: 4P - Package: 100mm - Pins: Reverse: $1.17 (voltage sensor)  
 https://www.aliexpress.us/item/3256807031812901.html
 
 INA219 Current Power Monitoring Sensor - Color: Solder: $1.46  
