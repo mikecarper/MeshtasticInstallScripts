@@ -2,17 +2,17 @@
 Station G2: $109.00  
 https://wiki.uniteng.com/en/meshtastic/station-g2
 
-10PCS JST ZH 1.5mm Wire Connector - Color: 10CM - Connector Type: Single head - Pins: 5P: $1.70 (power)  
-https://www.aliexpress.us/item/3256807090715570.html
-
-OPTIONAL - 10PCS JST SH 1.0mm Wire Connector - Color: 4P - Package: 100mm - Pins: Reverse: $1.17 (voltage sensor)  
-https://www.aliexpress.us/item/3256807031812901.html
-
-INA219 Current Power Monitoring Sensor - Color: Solder: $1.46  
-https://www.aliexpress.us/item/2255800037132313.html
-
 90 degree USB C connector - Color: CM-CG CW: $1.40  
 https://www.aliexpress.us/item/3256807615869192.html
+
+10PCS JST ZH 1.5mm Wire Connector - Color: 10CM - Connector Type: Single head - Pins: 5P: $1.70 (Power)  
+https://www.aliexpress.us/item/3256807090715570.html
+
+OPTIONAL - 10PCS JST SH 1.0mm Wire Connector - Color: 4P - Package: 100mm - Pins: Reverse: $1.17 (Voltage Sensor)  
+https://www.aliexpress.us/item/3256807031812901.html
+
+OPTIONAL - 10PCS JST ZH1.5 1.5mm Wire Cable Connector 10 Pin - Color: 20CM - Package: 10PCS - Connector Type: Single head - Pins: 10P: $3.13 (GPIO Relay)
+https://www.aliexpress.us/item/3256807090715570.html
 
 
 # Battery
@@ -94,6 +94,14 @@ https://www.aliexpress.us/item/3256805377294847.html
 
 Jumper Wire 40PCS female to female - 40cm: $4.63  
 https://www.aliexpress.us/item/3256801814340687.html
+
+# Battery Voltage
+INA219 Current Power Monitoring Sensor - Color: Solder: $1.46  
+https://www.aliexpress.us/item/2255800037132313.html
+
+# G2 GPIO for pi control
+3.3V 1 Channel Relay Module High And Low Level Trigger Dual Optocoupler Isolation Relay Module Board - Size: 3.3V: $2.29
+https://www.aliexpress.us/item/3256806177512453.html
 
 # Extra things
 
