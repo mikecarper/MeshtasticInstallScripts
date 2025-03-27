@@ -81,7 +81,13 @@ sudo apt install meshtasticd
 ```
 
 
+# Device init config
+https://meshtastic.org/docs/software/python/cli/#--set-config_sectionoption-value  
+https://meshtastic.org/docs/configuration/region-by-country/#u  
+```
+meshtastic --set lora.region US
 
+```
 
 
 # Rename Device
