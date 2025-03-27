@@ -15,8 +15,19 @@ battery_full_voltage  = 14.0   # Voltage considered as full (100% SOC)
 battery_empty_voltage = 10.5   # Voltage considered as empty (0% SOC)
 
 # ----- Initialize I2C Bus and INA219 Sensor -----
-i2c = busio.I2C(board.SCL, board.SDA)
-ina = INA219(i2c)
+try:
+    i2c = busio.I2C(board.SCL, board.SDA)
+    ina = INA219(i2c)
+except ValueError as e:
+    # Check if the message indicates hardware I2C is not enabled
+    if "No Hardware I2C on" in str(e):
+        print("I²C appears to be disabled. Please run:")
+        print("   sudo raspi-config")
+        print("   Go to 'Interface Options' → 'I2C' → select 'Enable'.")
+        sys.exit(1)
+    else:
+        # Some other ValueError
+        raise
 
 # ----- Initialize Min/Max Variables -----
 min_voltage = float('inf')
