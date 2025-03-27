@@ -86,7 +86,11 @@ https://meshtastic.org/docs/software/python/cli/#--set-config_sectionoption-valu
 https://meshtastic.org/docs/configuration/region-by-country/#u  
 ```
 meshtastic --set lora.region US
-
+```
+https://meshtastic.org/docs/configuration/radio/bluetooth/#bluetooth-config-client-availability  
+```
+meshtastic --set bluetooth.mode FIXED_PIN
+meshtastic --set bluetooth.fixed_pin 123456
 ```
 
 
