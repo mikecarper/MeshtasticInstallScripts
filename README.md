@@ -7,7 +7,6 @@ Get 64 bit NO desktop and enable SSH & WiFi from the imager
 https://login.tailscale.com/admin/  
 ```
 curl -fsSL https://tailscale.com/install.sh | sh  
-curl -fsSL https://tailscale.com/install.sh | sh  
 sudo tailscale up  
 ```
 
