@@ -7,11 +7,14 @@ meshtastic --debug --listen 2>&1 | grep 'ch3_voltage'
 
 ## Build via linux cli
 ```
-sudo apt -y install git
+sudo apt -y install git  python3-pip pipx
+sudo apt install pipx
+export PATH="$HOME/.local/bin:$PATH"
+
 git clone https://github.com/meshtastic/firmware.git
 cd firmware && git submodule update --init
 git pull --recurse-submodules
-sudo apt-get install python3-pip
+
 
 ```
 
