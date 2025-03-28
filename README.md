@@ -138,6 +138,11 @@ meshtastic --ch-add PS-MQTT!
 meshtastic --ch-set psk base64:mqttmqttmqttmqttmqttQQ== --ch-index 2
 meshtastic --ch-set module_settings.position_precision 17 --ch-index 2
 ```
+#### Delete channel
+https://meshtastic.org/docs/software/python/cli/#--ch-del  
+```
+meshtastic --ch-index 4 --ch-del
+```
 
 
 # MQTT
