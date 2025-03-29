@@ -17,6 +17,19 @@ git clone https://github.com/meshtastic/firmware.git
 cd firmware && git submodule update --init
 ```
 
+## add in extra file to the meshtastic firmware
+```
+git clone https://github.com/mikecarper/MeshtasticInstallScripts
+
+cd MeshtasticInstallScripts/
+git pull
+
+chmod +x enableGPOIfirmware.sh
+
+cp enableGPOIfirmware.sh ~/firmware/
+cp extra.patch ~/firmware/
+```
+
 ## Build via linux cli Compile
 ```
 # Get latest changes
