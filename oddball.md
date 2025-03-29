@@ -5,15 +5,32 @@ meshtastic --set telemetry.power_measurement_enabled true
 meshtastic --debug --listen 2>&1 | grep 'ch3_voltage'
 ```
 
-## Build via linux cli
+## Build via linux cli Init
 ```
-sudo apt -y install git  python3-pip pipx
-sudo apt install pipx
+sudo apt -y install git python3-pip pipx
+pipx install platformio
+pipx ensurepath
+
 export PATH="$HOME/.local/bin:$PATH"
 
 git clone https://github.com/meshtastic/firmware.git
 cd firmware && git submodule update --init
+```
+
+## Build via linux cli Compile
+```
+# Get latest changes
+git reset --hard
 git pull --recurse-submodules
+
+# Set DMESHTASTIC_EXCLUDE_REMOTEHARDWARE=0
+./enableGPOIfirmware.sh
+
+# apply other changes
+git apply extra.patch
+
+# Compile Firmware
+pio run -e station-g2
 
 
 ```
