@@ -45,6 +45,8 @@ git apply extra.patch
 # Compile Firmware
 pio run -e station-g2
 
+# Copy Firmware
+cp ~/firmware/.pio/build/station-g2/firmware.factory.bin
 
 ```
 
