@@ -45,8 +45,9 @@ git apply extra.patch
 # Compile Firmware
 pio run -e station-g2
 
-# Copy Firmware
-cp ~/firmware/.pio/build/station-g2/firmware.factory.bin
+# Copy Firmware to the remote server
+scp ~/firmware/.pio/build/station-g2/firmware.factory.bin bbs@100.100.100.100:"~/meshfirmware/meshtastic_firmware/compiled"
+
 
 ```
 
