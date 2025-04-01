@@ -59,3 +59,23 @@ index 204886be..c31ae129 100644
          sendNotification(meshtastic_LogRecord_Level_WARNING, p.id, "Multi-hop traceroute to broadcast address is not allowed");
          meshtastic_QueueStatus qs = router->getQueueStatus();
          service->sendQueueStatusToPhone(qs, 0, p.id);
+diff --git a/src/mesh/mesh-pb-constants.h b/src/mesh/mesh-pb-constants.h
+index f748d295..6ff4868a 100644
+--- a/src/mesh/mesh-pb-constants.h
++++ b/src/mesh/mesh-pb-constants.h
+@@ -34,7 +34,7 @@ static inline int get_max_num_nodes()
+ {
+     uint32_t flash_size = ESP.getFlashChipSize() / (1024 * 1024); // Convert Bytes to MB
+     if (flash_size >= 15) {
+-        return 250;
++        return 400;
+     } else if (flash_size >= 7) {
+         return 200;
+     } else {
+@@ -71,4 +71,4 @@ bool writecb(pb_ostream_t *stream, const uint8_t *buf, size_t count);
+  */
+ bool is_in_helper(uint32_t n, const uint32_t *array, pb_size_t count);
+ 
+-#define is_in_repeated(name, n) is_in_helper(n, name, name##_count)
+\ No newline at end of file
++#define is_in_repeated(name, n) is_in_helper(n, name, name##_count)
