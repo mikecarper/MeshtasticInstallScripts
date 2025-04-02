@@ -11,7 +11,7 @@ https://www.adafruit.com/product/5938
 Connector: N Type Male or Female to U.FL; cable type: 1.13mm Cable; cable length: 15cm; Type: U.FL Cable Assembly  
 https://www.aliexpress.us/item/3256805806786113.html
 
- DS3231 Real Time Clock Module: With Battery
+ DS3231 Real Time Clock Module: With Battery  
 https://www.aliexpress.us/item/3256806957527685.html
 
 ### N-Female
