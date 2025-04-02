@@ -1,7 +1,4 @@
 #!/bin/bash
-
-# Copy this file to firmware from the https://github.com/meshtastic/firmware/ repo
-
 # Optionally pass the desired environment name as the first argument.
 env_arg="$1"
 
@@ -57,9 +54,11 @@ fi
 # Now you have the selected environment in $selected_env.
 # You can use it further in your script.
 echo "Final environment: $selected_env"
+
 if [ -z "$env_arg" ]; then
     read -rp "Press Enter to continue..."
 fi
+
 
 output=$(git pull --recurse-submodules 2>&1)
 status=$?
@@ -108,22 +107,42 @@ pio run --environment "$selected_env" # -v
 SRCELF=.pio/build/"$selected_env"/firmware.elf
 cp "$SRCELF" "$OUTDIR"/"$basename".elf
 
-echo "Copying ESP32 bin file"
-SRCBIN=.pio/build/"$selected_env"/firmware.factory.bin
-cp "$SRCBIN" "$OUTDIR"/"$basename".bin
+if [ -f .pio/build/"$selected_env"/firmware.factory.bin ]; then
+    echo "Copying ESP32 bin file"
+    SRCBIN=.pio/build/"$selected_env"/firmware.factory.bin
+    cp "$SRCBIN" "$OUTDIR"/"$basename".bin
+fi
 
-echo "Copying ESP32 update bin file"
-SRCBIN=.pio/build/"$selected_env"/firmware.bin
-cp "$SRCBIN" "$OUTDIR"/"$basename"-update.bin
+if [ -f .pio/build/"$selected_env"/firmware.bin ]; then
+    echo "Copying ESP32 update bin file"
+    SRCBIN=.pio/build/"$selected_env"/firmware.bin
+    cp "$SRCBIN" "$OUTDIR"/"$basename"-update.bin
+fi
 
-echo "Building Filesystem for ESP32 targets"
-pio run --environment "$selected_env" -t buildfs
-cp .pio/build/"$selected_env"/littlefs.bin "$OUTDIR"/littlefswebui-"$selected_env"-"$VERSION".bin
-# Remove webserver files from the filesystem and rebuild
-ls -l data/static # Diagnostic list of files
-rm -rf data/static
-pio run --environment "$selected_env" -t buildfs
-cp .pio/build/"$selected_env"/littlefs.bin "$OUTDIR"/littlefs-"$selected_env"-"$VERSION".bin
+if [ -f .pio/build/"$selected_env"/firmware.zip ]; then
+    echo "Generating NRF52 dfu file"
+    DFUPKG=.pio/build/"$selected_env"/firmware.zip
+    cp $DFUPKG $OUTDIR/$basename-ota.zip
+fi
+
+if [ -f .pio/build/"$selected_env"/firmware.hex ]; then
+    echo "Generating NRF52 uf2 file"
+    SRCHEX=.pio/build/"$selected_env"/firmware.hex
+fi
+
+if [ ! -z "$SRCHEX" ]; then
+	bin/uf2conv.py $SRCHEX -c -o $OUTDIR/$basename.uf2 -f 0xADA52840
+	cp bin/*.uf2 $OUTDIR
+else
+    echo "Building Filesystem for ESP32 targets"
+    pio run --environment "$selected_env" -t buildfs
+    cp .pio/build/"$selected_env"/littlefs.bin "$OUTDIR"/littlefswebui-"$selected_env"-"$VERSION".bin
+    # Remove webserver files from the filesystem and rebuild
+    ls -l data/static # Diagnostic list of files
+    rm -rf data/static
+    pio run --environment "$selected_env" -t buildfs
+    cp .pio/build/"$selected_env"/littlefs.bin "$OUTDIR"/littlefs-"$selected_env"-"$VERSION".bin
+fi
 cp bin/device-install.* "$OUTDIR"
 cp bin/device-update.* "$OUTDIR"
 
@@ -138,5 +157,5 @@ if [ -f ~/.vpnServerInfo ]; then
     # Read the connection info (expected format: user@ip) from ~/.vpnServerInfo.
     connection=$(<~/.vpnServerInfo)
     # Now proceed with the SCP command.
-    scp -r "$OUTDIR"/* "${connection}":"~/meshfirmware/meshtastic_firmware/compiled"
+    scp -r "$OUTDIR"/* "${connection}":"~/meshfirmware/meshtastic_firmware/compiled/${VERSION}"
 fi
