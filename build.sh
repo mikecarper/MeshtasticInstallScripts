@@ -1,4 +1,12 @@
 #!/bin/bash
+
+
+VPN_INFO=~/.vpnServerInfo
+# Number of attempts for each file
+MAX_ATTEMPTS=60
+# Timeout in seconds for scp (adjust if needed)
+SCP_TIMEOUT=5
+
 # Optionally pass the desired environment name as the first argument.
 env_arg="$1"
 
@@ -153,9 +161,60 @@ find "$OUTDIR" -maxdepth 1 -type f -exec du -h {} \; \
   | awk '{print $1, $2}' \
   | column -t
 
-if [ -f ~/.vpnServerInfo ]; then
-    # Read the connection info (expected format: user@ip) from ~/.vpnServerInfo.
-    connection=$(<~/.vpnServerInfo)
-    # Now proceed with the SCP command.
-    scp -r "$OUTDIR"/* "${connection}":"~/meshfirmware/meshtastic_firmware/compiled/${VERSION}"
+if [ -f $VPN_INFO ]; then
+    # Trap SIGINT (Ctrl-C) to kill all child processes and exit.
+    trap 'echo "Interrupted by Ctrl-C. Exiting."; kill 0; exit 1' SIGINT
+
+    # Loop through each non-empty, non-comment line in the VPN info file.
+    while IFS= read -r connection || [ -n "$connection" ]; do
+
+        # Skip empty lines or lines beginning with '#' (comments)
+        [[ -z "$connection" || "$connection" =~ ^# ]] && continue
+               
+        echo "Processing connection: $connection"
+        # Prompt for the password once.
+        read -sp "Enter password for SCP/SSH: " PASSWORD < /dev/tty
+        echo ""
+
+        for file in "$OUTDIR"/*; do
+            [ -f "$file" ] || continue
+            basefile=$(basename "$file")
+            # Compute the local MD5 checksum.
+            local_md5=$(md5sum "$file" | awk '{print $1}')
+            attempt=1
+            success=0
+
+            while [ $attempt -le $MAX_ATTEMPTS ]; do
+                #echo "Attempt $attempt: Copying $basefile to $connection..."
+                # Use timeout with --foreground so that Ctrl-C is delivered to the child process.
+                timeout --foreground $SCP_TIMEOUT sshpass -p "$PASSWORD" scp -r "$file" "${connection}:~/meshfirmware/meshtastic_firmware/compiled/${VERSION}/"
+                scp_status=$?
+
+                if [ $scp_status -ne 0 ]; then
+                    #echo "scp failed (exit status $scp_status) for $basefile on $connection. Retrying..."
+                    attempt=$((attempt+1))
+                    continue
+                fi
+
+                # Compute the remote MD5 checksum via ssh.
+                remote_md5=$(sshpass -p "$PASSWORD" ssh "$connection" "md5sum ~/meshfirmware/meshtastic_firmware/compiled/${VERSION}/${basefile} 2>/dev/null" | awk '{print $1}')
+
+
+                if [ "$local_md5" = "$remote_md5" ]; then
+                    echo "$basefile copied successfully to $connection (MD5 matched)."
+                    success=1
+                    break
+                else
+                    echo "MD5 mismatch for $basefile on $connection. Retrying..."
+                    attempt=$((attempt+1))
+                fi
+            done
+
+            if [ $success -ne 1 ]; then
+                echo "Failed to copy $basefile to $connection after $MAX_ATTEMPTS attempts."
+            fi
+        done
+
+        echo "Finished processing $connection."
+    done < "$VPN_INFO"
 fi
