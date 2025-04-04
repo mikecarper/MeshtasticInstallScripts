@@ -1,6 +1,8 @@
 import os
 import xml.etree.ElementTree as ET
 
+# Use data from https://github.com/rwev/bible
+
 # Define sets for filtering by Bible section.
 TORAH = {"GENESIS", "EXODUS", "LEVITICUS", "NUMBERS", "DEUTERONOMY"}
 OT_BOOKS = TORAH.union({
