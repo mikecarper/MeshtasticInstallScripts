@@ -10,6 +10,31 @@ SCP_TIMEOUT=5
 # Optionally pass the desired environment name as the first argument.
 env_arg="$1"
 
+# Update git
+output=$(git pull --recurse-submodules 2>&1)
+status=$?
+
+if [ $status -ne 0 ] && echo "$output" | grep -q "Your local changes to the following files would be overwritten by merge"; then
+    git reset --hard
+    git pull --recurse-submodules
+    git apply extra.patch
+    
+    # Iterate over all platformio.ini files in ~/firmware and its subdirectories.
+    find . -type f -name "platformio.ini" | while read -r file; do
+        # Check if the file contains the string (using -- to treat the pattern literally)
+        if grep -q -- "-DMESHTASTIC_EXCLUDE_REMOTEHARDWARE=1" "$file"; then
+            echo "Processing: $file"
+            # Replace the string in-place
+            sed -i 's/-DMESHTASTIC_EXCLUDE_REMOTEHARDWARE=1/-DMESHTASTIC_EXCLUDE_REMOTEHARDWARE=0/g' "$file"
+        fi
+    done
+
+    echo "All platformio.ini files have been updated."
+
+else
+    echo "$output"
+fi
+
 # Get environment names from platformio.ini files.
 # This finds all lines that start with [env: and then strips off the prefix and trailing ].
 mapfile -t envs < <(
@@ -68,33 +93,10 @@ if [ -z "$env_arg" ]; then
 fi
 
 
-output=$(git pull --recurse-submodules 2>&1)
-status=$?
-
-if [ $status -ne 0 ] && echo "$output" | grep -q "Your local changes to the following files would be overwritten by merge"; then
-    git reset --hard
-    git pull --recurse-submodules
-    git apply extra.patch
-    
-    # Iterate over all platformio.ini files in ~/firmware and its subdirectories.
-    find . -type f -name "platformio.ini" | while read -r file; do
-        # Check if the file contains the string (using -- to treat the pattern literally)
-        if grep -q -- "-DMESHTASTIC_EXCLUDE_REMOTEHARDWARE=1" "$file"; then
-            echo "Processing: $file"
-            # Replace the string in-place
-            sed -i 's/-DMESHTASTIC_EXCLUDE_REMOTEHARDWARE=1/-DMESHTASTIC_EXCLUDE_REMOTEHARDWARE=0/g' "$file"
-        fi
-    done
-
-    echo "All platformio.ini files have been updated."
-
-else
-    echo "$output"
-fi
-
 platformio pkg update -e "$selected_env"
 
 VERSION=$(bin/buildinfo.py long)
+VERSION="${VERSION::-3}777"
 
 # The shell vars the build tool expects to find
 export APP_VERSION=$VERSION
@@ -173,7 +175,7 @@ if [ -f $VPN_INFO ]; then
                
         echo "Processing connection: $connection"
         # Prompt for the password once.
-        read -sp "Enter password for SCP/SSH: " PASSWORD < /dev/tty
+        read -rp "Enter password for SCP/SSH: " PASSWORD < /dev/tty
         echo ""
 
         for file in "$OUTDIR"/*; do
@@ -184,10 +186,16 @@ if [ -f $VPN_INFO ]; then
             attempt=1
             success=0
 
+            echo ""
             while [ $attempt -le $MAX_ATTEMPTS ]; do
-                #echo "Attempt $attempt: Copying $basefile to $connection..."
+                echo -n "$attempt: $basefile -> $connection..."
+                printf "\r"
+
+                # Ensure the remote directory exists.
+                sshpass -p "$PASSWORD" ssh "$connection" "mkdir -p ~/meshfirmware/meshtastic_firmware/${VERSION}/"
+
                 # Use timeout with --foreground so that Ctrl-C is delivered to the child process.
-                timeout --foreground $SCP_TIMEOUT sshpass -p "$PASSWORD" scp -r "$file" "${connection}:~/meshfirmware/meshtastic_firmware/compiled/${VERSION}/"
+                timeout --foreground $SCP_TIMEOUT sshpass -p "$PASSWORD" scp -r "$file" "${connection}:~/meshfirmware/meshtastic_firmware/${VERSION}/"
                 scp_status=$?
 
                 if [ $scp_status -ne 0 ]; then
@@ -197,7 +205,7 @@ if [ -f $VPN_INFO ]; then
                 fi
 
                 # Compute the remote MD5 checksum via ssh.
-                remote_md5=$(sshpass -p "$PASSWORD" ssh "$connection" "md5sum ~/meshfirmware/meshtastic_firmware/compiled/${VERSION}/${basefile} 2>/dev/null" | awk '{print $1}')
+                remote_md5=$(sshpass -p "$PASSWORD" ssh "$connection" "md5sum ~/meshfirmware/meshtastic_firmware/${VERSION}/${basefile} 2>/dev/null" | awk '{print $1}')
 
 
                 if [ "$local_md5" = "$remote_md5" ]; then
