@@ -1,8 +1,8 @@
 diff --git a/src/mesh/FloodingRouter.cpp b/src/mesh/FloodingRouter.cpp
-index 142ada80..f683534b 100644
+index 142ada80..d12b30b7 100644
 --- a/src/mesh/FloodingRouter.cpp
 +++ b/src/mesh/FloodingRouter.cpp
-@@ -65,12 +65,12 @@ bool FloodingRouter::isRebroadcaster()
+@@ -65,12 +65,14 @@ bool FloodingRouter::isRebroadcaster()
  
  void FloodingRouter::perhapsRebroadcast(const meshtastic_MeshPacket *p)
  {
@@ -13,12 +13,21 @@ index 142ada80..f683534b 100644
                  meshtastic_MeshPacket *tosend = packetPool.allocCopy(*p); // keep a copy because we will be sending it
  
 -                tosend->hop_limit--; // bump down the hop count
-+                //tosend->hop_limit--; // bump down the hop count
++                if (tosend->hop_limit > 0) {
++                    tosend->hop_limit--; // bump down the hop count
++                }
  #if USERPREFS_EVENT_MODE
                  if (tosend->hop_limit > 2) {
                      // if we are "correcting" the hop_limit, "correct" the hop_start by the same amount to preserve hops away.
+@@ -107,4 +109,4 @@ void FloodingRouter::sniffReceived(const meshtastic_MeshPacket *p, const meshtas
+ 
+     // handle the packet as normal
+     Router::sniffReceived(p, c);
+-}
+\ No newline at end of file
++}
 diff --git a/src/mesh/NextHopRouter.cpp b/src/mesh/NextHopRouter.cpp
-index f21974a2..bff16fda 100644
+index f21974a2..84d6fd61 100644
 --- a/src/mesh/NextHopRouter.cpp
 +++ b/src/mesh/NextHopRouter.cpp
 @@ -22,7 +22,7 @@ ErrorCode NextHopRouter::send(meshtastic_MeshPacket *p)
@@ -30,7 +39,7 @@ index f21974a2..bff16fda 100644
          startRetransmission(packetPool.allocCopy(*p)); // start retransmission for relayed packet
  
      return Router::send(p);
-@@ -98,13 +98,13 @@ void NextHopRouter::sniffReceived(const meshtastic_MeshPacket *p, const meshtast
+@@ -98,13 +98,15 @@ void NextHopRouter::sniffReceived(const meshtastic_MeshPacket *p, const meshtast
  /* Check if we should be relaying this packet if so, do so. */
  bool NextHopRouter::perhapsRelay(const meshtastic_MeshPacket *p)
  {
@@ -42,10 +51,19 @@ index f21974a2..bff16fda 100644
                  LOG_INFO("Relaying received message coming from %x", p->relay_node);
  
 -                tosend->hop_limit--; // bump down the hop count
-+                //tosend->hop_limit--; // bump down the hop count
++                if (tosend->hop_limit > 0) {
++                    tosend->hop_limit--; // bump down the hop count
++                }
                  NextHopRouter::send(tosend);
  
                  return true;
+@@ -269,4 +271,4 @@ void NextHopRouter::setNextTx(PendingPacket *pending)
+     LOG_DEBUG("Setting next retransmission in %u msecs: ", d);
+     printPacket("", pending->packet);
+     setReceivedMessage(); // Run ASAP, so we can figure out our correct sleep time
+-}
+\ No newline at end of file
++}
 diff --git a/src/mesh/PhoneAPI.cpp b/src/mesh/PhoneAPI.cpp
 index 204886be..c31ae129 100644
 --- a/src/mesh/PhoneAPI.cpp
