@@ -19,21 +19,21 @@ if [ $status -ne 0 ] && echo "$output" | grep -q "Your local changes to the foll
     git pull --recurse-submodules
     git apply extra.patch
     
-    # Iterate over all platformio.ini files in ~/firmware and its subdirectories.
-    find . -type f -name "platformio.ini" | while read -r file; do
-        # Check if the file contains the string (using -- to treat the pattern literally)
-        if grep -q -- "-DMESHTASTIC_EXCLUDE_REMOTEHARDWARE=1" "$file"; then
-            echo "Processing: $file"
-            # Replace the string in-place
-            sed -i 's/-DMESHTASTIC_EXCLUDE_REMOTEHARDWARE=1/-DMESHTASTIC_EXCLUDE_REMOTEHARDWARE=0/g' "$file"
-        fi
-    done
-
-    echo "All platformio.ini files have been updated."
-
 else
     echo "$output"
 fi
+
+# Iterate over all platformio.ini files in ~/firmware and its subdirectories.
+find . -type f -name "platformio.ini" | while read -r file; do
+    # Check if the file contains the string (using -- to treat the pattern literally)
+    if grep -q -- "-DMESHTASTIC_EXCLUDE_REMOTEHARDWARE=1" "$file"; then
+        echo "Processing: $file"
+        # Replace the string in-place
+        sed -i 's/-DMESHTASTIC_EXCLUDE_REMOTEHARDWARE=1/-DMESHTASTIC_EXCLUDE_REMOTEHARDWARE=0/g' "$file"
+    fi
+done
+
+echo "All platformio.ini files have been updated."
 
 # Get environment names from platformio.ini files.
 # This finds all lines that start with [env: and then strips off the prefix and trailing ].
