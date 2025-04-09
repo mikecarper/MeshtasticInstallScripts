@@ -1,7 +1,7 @@
 #!/bin/bash
 
 
-VPN_INFO=~/.vpnServerInfo
+VPN_INFO="$HOME/.vpnServerInfo"
 # Number of attempts for each file
 MAX_ATTEMPTS=60
 # Timeout in seconds for scp (adjust if needed)
@@ -169,60 +169,61 @@ if [ -f $VPN_INFO ]; then
 
     # Loop through each non-empty, non-comment line in the VPN info file.
     while IFS= read -r connection || [ -n "$connection" ]; do
-
+        echo ""
+        echo $connection
         # Skip empty lines or lines beginning with '#' (comments)
         [[ -z "$connection" || "$connection" =~ ^# ]] && continue
-               
-        echo "Processing connection: $connection"
+
         # Prompt for the password once.
+
         read -rp "Enter password for SCP/SSH: " PASSWORD < /dev/tty
-        echo ""
 
-        for file in "$OUTDIR"/*; do
-            [ -f "$file" ] || continue
-            basefile=$(basename "$file")
-            # Compute the local MD5 checksum.
-            local_md5=$(md5sum "$file" | awk '{print $1}')
-            attempt=1
-            success=0
+        if [ "$PASSWORD" != "skip" ]; then
+            for file in "$OUTDIR"/*; do
+                [ -f "$file" ] || continue
+                basefile=$(basename "$file")
+                # Compute the local MD5 checksum.
+                local_md5=$(md5sum "$file" | awk '{print $1}')
+                attempt=1
+                success=0
 
-            echo ""
-            while [ $attempt -le $MAX_ATTEMPTS ]; do
-                echo -n "$attempt: $basefile -> $connection..."
-                printf "\r"
+                while [ $attempt -le $MAX_ATTEMPTS ]; do
+                    echo -n "$attempt: $basefile -> $connection..."
+                    printf "\r"
 
-                # Ensure the remote directory exists.
-                sshpass -p "$PASSWORD" ssh "$connection" "mkdir -p ~/meshfirmware/meshtastic_firmware/${VERSION}/"
+                    # Ensure the remote directory exists.
+                    sshpass -p "$PASSWORD" ssh -n -o StrictHostKeyChecking=no "$connection" "mkdir -p ~/meshfirmware/meshtastic_firmware/${VERSION}/"
 
-                # Use timeout with --foreground so that Ctrl-C is delivered to the child process.
-                timeout --foreground $SCP_TIMEOUT sshpass -p "$PASSWORD" scp -r "$file" "${connection}:~/meshfirmware/meshtastic_firmware/${VERSION}/"
-                scp_status=$?
+                    # Use timeout with --foreground so that Ctrl-C is delivered to the child process.
+                    timeout --foreground $SCP_TIMEOUT sshpass -p "$PASSWORD" scp -r -o StrictHostKeyChecking=no "$file" "${connection}:~/meshfirmware/meshtastic_firmware/${VERSION}/" < /dev/null
+                    scp_status=$?
 
-                if [ $scp_status -ne 0 ]; then
-                    #echo "scp failed (exit status $scp_status) for $basefile on $connection. Retrying..."
-                    attempt=$((attempt+1))
-                    continue
-                fi
+                    if [ $scp_status -ne 0 ]; then
+                        #echo "scp failed (exit status $scp_status) for $basefile on $connection. Retrying..."
+                        attempt=$((attempt+1))
+                        continue
+                    fi
 
-                # Compute the remote MD5 checksum via ssh.
-                remote_md5=$(sshpass -p "$PASSWORD" ssh "$connection" "md5sum ~/meshfirmware/meshtastic_firmware/${VERSION}/${basefile} 2>/dev/null" | awk '{print $1}')
+                    # Compute the remote MD5 checksum via ssh.
+                    remote_md5=$(sshpass -p "$PASSWORD" ssh -n -o StrictHostKeyChecking=no "$connection" "md5sum ~/meshfirmware/meshtastic_firmware/${VERSION}/${basefile} 2>/dev/null" | awk '{print $1}')
 
 
-                if [ "$local_md5" = "$remote_md5" ]; then
-                    echo "$basefile copied successfully to $connection (MD5 matched)."
-                    success=1
-                    break
-                else
-                    echo "MD5 mismatch for $basefile on $connection. Retrying..."
-                    attempt=$((attempt+1))
+                    if [ "$local_md5" = "$remote_md5" ]; then
+                        echo "$basefile copied to $connection (MD5 matched)."
+                        success=1
+                        break
+                    else
+                        echo "MD5 mismatch for $basefile on $connection. Retrying..."
+                        attempt=$((attempt+1))
+                    fi
+                done
+
+                if [ $success -ne 1 ]; then
+                    echo "Failed to copy $basefile to $connection after $MAX_ATTEMPTS attempts."
                 fi
             done
 
-            if [ $success -ne 1 ]; then
-                echo "Failed to copy $basefile to $connection after $MAX_ATTEMPTS attempts."
-            fi
-        done
-
-        echo "Finished processing $connection."
+            echo "Finished processing $connection."
+        fi
     done < "$VPN_INFO"
 fi
