@@ -146,10 +146,10 @@ https://pugetmesh.org/meshtastic/config/#ps-mqtt-channel
 https://meshtastic.org/docs/configuration/radio/channels/
 ```
 meshtastic --ch-add PS-Mesh!
-meshtastic --ch-set psk base64:jHrxpQOq6dEBC5Ldr3ULrQ== --ch-index 1
+meshtastic --ch-set psk "base64:jHrxpQOq6dEBC5Ldr3ULrQ==" --ch-index 1
 meshtastic --ch-set module_settings.position_precision 17 --ch-index 1
 meshtastic --ch-add PS-MQTT! 
-meshtastic --ch-set psk base64:mqttmqttmqttmqttmqttQQ== --ch-index 2
+meshtastic --ch-set psk "base64:mqttmqttmqttmqttmqttQQ==" --ch-index 2
 meshtastic --ch-set module_settings.position_precision 17 --ch-index 2
 ```
 #### Delete channel
@@ -162,7 +162,7 @@ meshtastic --ch-index 4 --ch-del
 # MQTT
 https://meshtastic.org/docs/configuration/module/mqtt/#mqtt-module-config-client-availability
 ```
-meshtastic --set network.wifi_enabled true --set network.wifi_ssid "FCC Van" --set network.wifi_psk wifipassword
+meshtastic --set network.wifi_enabled true --set network.wifi_ssid "FCC Van" --set network.wifi_psk "wifipassword"
 meshtastic --set lora.config_ok_to_mqtt true
 meshtastic --set mqtt.address mqtt.davekeogh.com
 meshtastic --set mqtt.username meshdev
