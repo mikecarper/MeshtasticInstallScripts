@@ -98,8 +98,8 @@ https://meshtastic.org/docs/software/python/cli/#--set-config_sectionoption-valu
 https://meshtastic.org/docs/configuration/region-by-country/#u  
 https://meshtastic.org/docs/configuration/radio/lora/#region  
 ```
-meshtastic --set lora.region US
 meshtastic --set lora.tx_power 10 # (1w) station g2. 14 (2.5w) max with no distortion https://wiki.uniteng.com/en/meshtastic/station-g2#summary-for-lora-power-amplifier-conduction-test
+meshtastic --set lora.region US
 ```
 https://meshtastic.org/docs/configuration/radio/bluetooth/#bluetooth-config-client-availability  
 ```
