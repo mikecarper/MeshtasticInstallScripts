@@ -79,6 +79,19 @@ sudo apt update
 sudo apt install meshtasticd
 ```
 
+# Admin keys
+https://meshtastic.org/docs/configuration/remote-admin/#remote-admin-config-client-availability  
+Run this on the every day carry node that will be used to control the remote nodes  
+```
+meshtastic --get security.public_key
+# base64:EUBO1PaqmYSb9nuc2RoDyKuXaZuEAxhJusick1VRA8k=
+```
+`head -c 32 /dev/urandom | base64` was used to make the above string
+
+Run this on the rooftop node that will need to be configured remotely
+```
+meshtastic --set security.admin_key "base64:EUBO1PaqmYSb9nuc2RoDyKuXaZuEAxhJusick1VRA8k="
+```
 
 # Device init config
 https://meshtastic.org/docs/software/python/cli/#--set-config_sectionoption-value  
@@ -86,6 +99,7 @@ https://meshtastic.org/docs/configuration/region-by-country/#u
 https://meshtastic.org/docs/configuration/radio/lora/#region  
 ```
 meshtastic --set lora.region US
+meshtastic --set lora.tx_power 10 # (1w) station g2. 14 (2.5w) max with no distortion https://wiki.uniteng.com/en/meshtastic/station-g2#summary-for-lora-power-amplifier-conduction-test
 ```
 https://meshtastic.org/docs/configuration/radio/bluetooth/#bluetooth-config-client-availability  
 ```
