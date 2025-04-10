@@ -19,7 +19,7 @@ if [ $status -ne 0 ] && echo "$output" | grep -q "Your local changes to the foll
     git pull --recurse-submodules
     if [ -f extra.bbs.patch ]; then
         git apply extra.bbs.patch
-    else
+    elif [ -f extra.patch ]; then
         git apply extra.patch
     fi
     
