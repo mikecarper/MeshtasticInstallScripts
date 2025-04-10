@@ -51,3 +51,11 @@ scp ~/firmware/.pio/build/station-g2/firmware.factory.bin bbs@100.100.100.100:"~
 
 ```
 
+
+## Auto reboot at 3:30am
+```
+
+if ! sudo crontab -l 2>/dev/null | grep -Fq "30 3 * * * /sbin/shutdown -r now"; then
+    (sudo crontab -l 2>/dev/null; echo "30 3 * * * /sbin/shutdown -r now") | sudo crontab -
+fi
+```
