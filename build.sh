@@ -50,7 +50,6 @@ if [ ${#envs[@]} -eq 0 ]; then
 fi
 
 selected_env=""
-
 if [ -n "$env_arg" ]; then
     # Try to auto-select an environment that matches the provided argument (case-insensitive).
     for env in "${envs[@]}"; do
@@ -73,6 +72,36 @@ if [ -z "$selected_env" ]; then
     for i in "${!envs[@]}"; do
         printf "%d) %s\n" $((i+1)) "${envs[$i]}"
     done
+    
+    # If .pio/libdeps exists, show the short list of already built environments—but only if there is at least one.
+    if [ -d ".pio/libdeps" ]; then
+        # Enable nullglob so that the array is empty if no match is found.
+        shopt -s nullglob
+        built_dirs=(.pio/libdeps/*/)
+        if [ ${#built_dirs[@]} -gt 0 ]; then
+            # Create an associative array of built environment names.
+            declare -A built_envs
+            for d in "${built_dirs[@]}"; do
+                if [ -d "$d" ]; then
+                    built_name=$(basename "$d")
+                    built_envs["$built_name"]=1
+                fi
+            done
+            # Only print the section if at least one environment matches.
+            if [ ${#built_envs[@]} -gt 0 ]; then
+                echo ""
+                echo "Already built environments:"
+                # Loop through the global env list. When the env name is found in built_envs, print its number and name.
+                for i in "${!envs[@]}"; do
+                    env_name="${envs[$i]}"
+                    if [ "${built_envs[$env_name]}" ]; then
+                        printf "%d) %s\n" $((i+1)) "$env_name"
+                    fi
+                done
+            fi
+        fi
+        shopt -u nullglob
+    fi
 
     read -rp "Enter number: " selection
     if ! [[ "$selection" =~ ^[0-9]+$ ]] || [ "$selection" -lt 1 ] || [ "$selection" -gt ${#envs[@]} ]; then
@@ -81,7 +110,6 @@ if [ -z "$selected_env" ]; then
     fi
 
     selected_env="${envs[$((selection-1))]}"
-    echo "You selected: $selected_env"
 fi
 
 # Now you have the selected environment in $selected_env.
