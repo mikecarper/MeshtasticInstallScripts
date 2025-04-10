@@ -17,7 +17,11 @@ status=$?
 if [ $status -ne 0 ] && echo "$output" | grep -q "Your local changes to the following files would be overwritten by merge"; then
     git reset --hard
     git pull --recurse-submodules
-    git apply extra.patch
+    if [ -f extra.bbs.patch ]; then
+        git apply extra.bbs.patch
+    else
+        git apply extra.patch
+    fi
     
 else
     echo "$output"
