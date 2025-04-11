@@ -11,33 +11,14 @@ SCP_TIMEOUT=5
 env_arg="$1"
 
 # Update git
-output=$(git pull --recurse-submodules 2>&1)
-status=$?
+git reset --hard
+git fetch origin
+git switch master 2>/dev/null || git checkout master
+git reset --hard origin/master
+git fetch origin
+git pull --recurse-submodules
+git_reset=1
 
-if [ $status -ne 0 ] && echo "$output" | grep -q "Your local changes to the following files would be overwritten by merge"; then
-    git reset --hard
-    git pull --recurse-submodules
-    if [ -f extra.bbs.patch ]; then
-        git apply extra.bbs.patch
-    elif [ -f extra.patch ]; then
-        git apply extra.patch
-    fi
-    
-else
-    echo "$output"
-fi
-
-# Iterate over all platformio.ini files in ~/firmware and its subdirectories.
-find . -type f -name "platformio.ini" | while read -r file; do
-    # Check if the file contains the string (using -- to treat the pattern literally)
-    if grep -q -- "-DMESHTASTIC_EXCLUDE_REMOTEHARDWARE=1" "$file"; then
-        echo "Processing: $file"
-        # Replace the string in-place
-        sed -i 's/-DMESHTASTIC_EXCLUDE_REMOTEHARDWARE=1/-DMESHTASTIC_EXCLUDE_REMOTEHARDWARE=0/g' "$file"
-    fi
-done
-
-echo "All platformio.ini files have been updated."
 
 # Get environment names from platformio.ini files.
 # This finds all lines that start with [env: and then strips off the prefix and trailing ].
@@ -120,6 +101,72 @@ fi
 # You can use it further in your script.
 echo "Final environment: $selected_env"
 
+
+VERSION=$(bin/buildinfo.py long)
+VERSION="${VERSION::-3}777"
+
+# The shell vars the build tool expects to find
+export APP_VERSION=$VERSION
+
+# Get the last 20 tags (sorted by creation date descending)
+mapfile -t tags < <(git tag --sort=-creatordate | head -n20 | tac)
+
+if [ ${#tags[@]} -eq 0 ]; then
+    echo "No tags found in this repository."
+    exit 1
+fi
+
+echo "Select a release to check out:"
+n=1
+declare -A tagmap
+for tag in "${tags[@]}"; do
+    echo "$n) $tag"
+    tagmap[$n]="$tag"
+    ((n++))
+done
+# Add an extra option for "current"
+echo "$n) v${VERSION}+ current "
+read -rp "Enter selection [1-$n]: " choice
+
+if [[ "$choice" =~ ^[0-9]+$ ]]; then
+    if [ "$choice" -ge 1 ] && [ "$choice" -lt "$n" ]; then
+        selected="${tagmap[$choice]}"
+        echo "You selected tag: $selected"
+        git reset --hard
+        git_reset=1
+        git config advice.detachedHead false
+        git checkout "$selected"
+    elif [ "$choice" -eq "$n" ]; then
+        echo "You selected: $VERSION current"
+    else
+        echo "Invalid selection: number not in range."
+        exit 1
+    fi
+else
+    echo "Invalid input; please enter a number."
+    exit 1
+fi
+
+
+if [ "$git_reset" = 1 ]; then
+    if [ -f extra.bbs.patch ]; then
+        git apply extra.bbs.patch
+    elif [ -f extra.patch ]; then
+        git apply extra.patch
+    fi
+fi
+# Iterate over all platformio.ini files in ~/firmware and its subdirectories.
+find . -type f -name "platformio.ini" | while read -r file; do
+    # Check if the file contains the string (using -- to treat the pattern literally)
+    if grep -q -- "-DMESHTASTIC_EXCLUDE_REMOTEHARDWARE=1" "$file"; then
+        echo "Processing: $file"
+        # Replace the string in-place
+        sed -i 's/-DMESHTASTIC_EXCLUDE_REMOTEHARDWARE=1/-DMESHTASTIC_EXCLUDE_REMOTEHARDWARE=0/g' "$file"
+    fi
+done
+
+echo "All platformio.ini files have been updated."
+
 if [ -f extra.bbs.patch ] || [ -f extra.patch ]; then
     count=$(grep -IFirn "ROUTER_LATE" . --exclude=*.patch --exclude=*.diff --exclude=*.sh | wc -l)
     if [ "$count" -ne 6 ]; then
@@ -135,11 +182,6 @@ fi
 
 platformio pkg update -e "$selected_env"
 
-VERSION=$(bin/buildinfo.py long)
-VERSION="${VERSION::-3}777"
-
-# The shell vars the build tool expects to find
-export APP_VERSION=$VERSION
 
 OUTDIR=release/$VERSION/
 
