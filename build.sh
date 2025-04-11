@@ -120,6 +120,14 @@ fi
 # You can use it further in your script.
 echo "Final environment: $selected_env"
 
+if [ -f extra.bbs.patch ] || [ -f extra.patch ]; then
+    count=$(grep -IFirn "ROUTER_LATE" . --exclude=*.patch --exclude=*.diff --exclude=*.sh | wc -l)
+    if [ "$count" -ne 6 ]; then
+        echo "Warning: Expected 6 matches, but found $count."
+        grep -IFirn "ROUTER_LATE" . --exclude=*.patch --exclude=*.diff
+    fi
+fi
+
 if [ -z "$env_arg" ]; then
     read -rp "Press Enter to continue..."
 fi
@@ -164,7 +172,7 @@ fi
 if [ -f .pio/build/"$selected_env"/firmware.zip ]; then
     echo "Generating NRF52 dfu file"
     DFUPKG=.pio/build/"$selected_env"/firmware.zip
-    cp $DFUPKG $OUTDIR/$basename-ota.zip
+    cp "$DFUPKG" "$OUTDIR/$basename-ota.zip"
 fi
 
 if [ -f .pio/build/"$selected_env"/firmware.hex ]; then
@@ -172,9 +180,9 @@ if [ -f .pio/build/"$selected_env"/firmware.hex ]; then
     SRCHEX=.pio/build/"$selected_env"/firmware.hex
 fi
 
-if [ ! -z "$SRCHEX" ]; then
-	bin/uf2conv.py $SRCHEX -c -o $OUTDIR/$basename.uf2 -f 0xADA52840
-	cp bin/*.uf2 $OUTDIR
+if [ -n "$SRCHEX" ]; then
+	bin/uf2conv.py "$SRCHEX" -c -o "$OUTDIR/$basename.uf2" -f 0xADA52840
+	cp bin/*.uf2 "$OUTDIR"
 else
     echo "Building Filesystem for ESP32 targets"
     pio run --environment "$selected_env" -t buildfs
@@ -195,14 +203,14 @@ find "$OUTDIR" -maxdepth 1 -type f -exec du -h {} \; \
   | awk '{print $1, $2}' \
   | column -t
 
-if [ -f $VPN_INFO ]; then
+if [ -f "$VPN_INFO" ]; then
     # Trap SIGINT (Ctrl-C) to kill all child processes and exit.
     trap 'echo "Interrupted by Ctrl-C. Exiting."; kill 0; exit 1' SIGINT
 
     # Loop through each non-empty, non-comment line in the VPN info file.
     while IFS= read -r connection || [ -n "$connection" ]; do
         echo ""
-        echo $connection
+        echo "$connection"
         # Skip empty lines or lines beginning with '#' (comments)
         [[ -z "$connection" || "$connection" =~ ^# ]] && continue
 
