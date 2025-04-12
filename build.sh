@@ -105,9 +105,6 @@ echo "Final environment: $selected_env"
 VERSION=$(bin/buildinfo.py long)
 VERSION="${VERSION::-3}777"
 
-# The shell vars the build tool expects to find
-export APP_VERSION=$VERSION
-
 # Get the last 20 tags (sorted by creation date descending)
 mapfile -t tags < <(git tag --sort=-creatordate | head -n20 | tac)
 
@@ -148,30 +145,101 @@ else
 fi
 
 
-if [ "$git_reset" = 1 ]; then
-    if [ -f extra.bbs.patch ]; then
-        git apply extra.bbs.patch
-    elif [ -f extra.patch ]; then
-        git apply extra.patch
-    fi
-fi
-# Iterate over all platformio.ini files in ~/firmware and its subdirectories.
+# Build arrays for menu options and their corresponding actions.
+options=()
+actions=()
+
+# Option 1: No modifications.
+options+=("No modifications")
+actions+=("echo 'No modifications selected.'")
+
+# Option 2: Enable Remote Hardware.
+# This updates every platformio.ini file by replacing "-DMESHTASTIC_EXCLUDE_REMOTEHARDWARE=1" with "0".
+read -r -d '' act_enable <<'EOF'
 find . -type f -name "platformio.ini" | while read -r file; do
-    # Check if the file contains the string (using -- to treat the pattern literally)
-    if grep -q -- "-DMESHTASTIC_EXCLUDE_REMOTEHARDWARE=1" "$file"; then
-        echo "Processing: $file"
-        # Replace the string in-place
-        sed -i 's/-DMESHTASTIC_EXCLUDE_REMOTEHARDWARE=1/-DMESHTASTIC_EXCLUDE_REMOTEHARDWARE=0/g' "$file"
-    fi
+  if grep -q -- "-DMESHTASTIC_EXCLUDE_REMOTEHARDWARE=1" "$file"; then
+    echo "Processing: $file"
+    sed -i 's/-DMESHTASTIC_EXCLUDE_REMOTEHARDWARE=1/-DMESHTASTIC_EXCLUDE_REMOTEHARDWARE=0/g' "$file"
+  fi
+done
+echo "All platformio.ini files have been updated."
+EOF
+
+options+=("Enable Remote Hardware")
+actions+=("$act_enable")
+
+# Option 3: Enable Remote Hardware + apply extra.bbs.patch.
+if [ -f extra.bbs.patch ]; then
+    read -r -d '' act_extra <<'EOF'
+find . -type f -name "platformio.ini" | while read -r file; do
+  if grep -q -- "-DMESHTASTIC_EXCLUDE_REMOTEHARDWARE=1" "$file"; then
+    echo "Processing: $file"
+    sed -i 's/-DMESHTASTIC_EXCLUDE_REMOTEHARDWARE=1/-DMESHTASTIC_EXCLUDE_REMOTEHARDWARE=0/g' "$file"
+  fi
+done
+echo "All platformio.ini files have been updated."
+echo "Applying extra.bbs.patch..."
+git apply extra.bbs.patch
+EOF
+    options+=("Enable Remote Hardware + apply extra.bbs.patch")
+    actions+=("$act_extra")
+fi
+
+# Option 4: Enable Remote Hardware + apply extra.bbs.patch + tracker-t1000-e.patch.
+if [ -f extra.bbs.patch ] && [ -f tracker-t1000-e.patch ]; then
+    read -r -d '' act_both <<'EOF'
+find . -type f -name "platformio.ini" | while read -r file; do
+  if grep -q -- "-DMESHTASTIC_EXCLUDE_REMOTEHARDWARE=1" "$file"; then
+    echo "Processing: $file"
+    sed -i 's/-DMESHTASTIC_EXCLUDE_REMOTEHARDWARE=1/-DMESHTASTIC_EXCLUDE_REMOTEHARDWARE=0/g' "$file"
+  fi
+done
+echo "All platformio.ini files have been updated."
+echo "Applying extra.bbs.patch..."
+git apply extra.bbs.patch
+echo "Applying tracker-t1000-e.patch..."
+git apply tracker-t1000-e.patch
+EOF
+    options+=("Enable Remote Hardware + apply extra.bbs.patch + tracker-t1000-e.patch")
+    actions+=("$act_both")
+fi
+
+# Option 5: Apply tracker-t1000-e.patch only.
+if [ -f tracker-t1000-e.patch ]; then
+    read -r -d '' act_tracker <<'EOF'
+echo "Applying tracker-t1000-e.patch..."
+git apply tracker-t1000-e.patch
+EOF
+    options+=("tracker-t1000-e.patch")
+    actions+=("$act_tracker")
+fi
+
+# Display the menu.
+echo "Select an option:"
+for i in "${!options[@]}"; do
+    printf "%d) %s\n" $((i+1)) "${options[$i]}"
 done
 
-echo "All platformio.ini files have been updated."
+read -rp "Enter your choice (1-${#options[@]}): " choice
+
+# Validate input.
+if ! [[ "$choice" =~ ^[0-9]+$ ]] || [ "$choice" -lt 1 ] || [ "$choice" -gt "${#options[@]}" ]; then
+    echo "Invalid choice. Exiting."
+    exit 1
+fi
+
+selected_index=$((choice-1))
+echo "Executing: ${options[$selected_index]}"
+# Execute the corresponding action.
+eval "${actions[$selected_index]}"
+
+
 
 if [ -f extra.bbs.patch ] || [ -f extra.patch ]; then
     count=$(grep -IFirn "ROUTER_LATE" . --exclude=*.patch --exclude=*.diff --exclude=*.sh | wc -l)
-    if [ "$count" -ne 6 ]; then
-        echo "Warning: Expected 6 matches, but found $count."
-        grep -IFirn "ROUTER_LATE" . --exclude=*.patch --exclude=*.diff
+    if [ "$count" -ne 5 ]; then
+        echo "Warning: Expected 5 matches, but found $count."
+        grep -IFirn "ROUTER_LATE" . --exclude=*.patch --exclude=*.diff --exclude=*.sh
     fi
 fi
 
@@ -183,6 +251,8 @@ fi
 platformio pkg update -e "$selected_env"
 
 
+# The shell vars the build tool expects to find
+export APP_VERSION=$VERSION
 OUTDIR=release/$VERSION/
 
 rm -f "${OUTDIR:?}"/firmware*
@@ -226,9 +296,10 @@ if [ -n "$SRCHEX" ]; then
 	bin/uf2conv.py "$SRCHEX" -c -o "$OUTDIR/$basename.uf2" -f 0xADA52840
 	cp bin/*.uf2 "$OUTDIR"
 else
-    echo "Building Filesystem for ESP32 targets"
+    echo "Building Filesystem with web server for ESP32 targets"
     pio run --environment "$selected_env" -t buildfs
     cp .pio/build/"$selected_env"/littlefs.bin "$OUTDIR"/littlefswebui-"$selected_env"-"$VERSION".bin
+    echo "Building Filesystem only for ESP32 targets"
     # Remove webserver files from the filesystem and rebuild
     ls -l data/static # Diagnostic list of files
     rm -rf data/static
