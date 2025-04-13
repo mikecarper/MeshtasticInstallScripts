@@ -120,8 +120,10 @@ meshtastic --set-owner-short "🤖"
 
 
 # Set Location
-https://meshtastic.org/docs/software/python/cli/#--setalt-setalt
+https://meshtastic.org/docs/software/python/cli/#--setalt-setalt  
+https://meshtastic.org/docs/configuration/radio/position/#position-config-client-availability  
 ```
+meshtastic --set position.gps_mode NOT_PRESENT
 meshtastic --setalt 86 --setlat 47.625127 --setlon -122.1019996
 ```
 https://meshtastic.org/docs/configuration/radio/channels/#setting-position-precision
