@@ -131,8 +131,7 @@ meshtastic --ch-set module_settings.position_precision 17 --ch-index 0
 
 
 # Set mode of Device
-https://meshtastic.org/docs/configuration/radio/device/#cli
-https://meshtastic.org/docs/configuration/module/serial/#serial-module-config-client-availability
+https://meshtastic.org/docs/configuration/radio/device/#cli  
 ```
 meshtastic --set device.role ROUTER_LATE
 meshtastic --set lora.hop_limit 7
