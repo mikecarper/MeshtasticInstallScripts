@@ -189,6 +189,12 @@ meshtastic --set neighbor_info.transmit_over_lora true
 meshtastic --set neighbor_info.enabled true
 ```
 
+https://meshtastic.org/docs/configuration/module/store-and-forward-module/
+```
+meshtastic --set store_forward.enabled true
+meshtastic --set store_forward.is_server true
+```
+
 
 # Disable Bluetooth
 https://meshtastic.org/docs/configuration/radio/bluetooth/#bluetooth-config-client-availability
