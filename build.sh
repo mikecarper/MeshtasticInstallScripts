@@ -144,77 +144,75 @@ else
     exit 1
 fi
 
+# Determine which extra patch exists, prefer extra.bbs.patch if available.
+if [ -f extra.bbs.patch ]; then
+  extraPatchFile="extra.bbs.patch"
+elif [ -f extra.patch ]; then
+  extraPatchFile="extra.patch"
+else
+  extraPatchFile=""
+fi
 
-# Build arrays for menu options and their corresponding actions.
+# Check for an environment-specific patch.
+if [ -f "${selected_env}.patch" ]; then
+  envPatchFile="${selected_env}.patch"
+else
+  envPatchFile=""
+fi
+
+# Prepare an array of menu options and corresponding actions.
 options=()
 actions=()
 
-# Option 1: No modifications.
+# --- Option 1: No modifications ---
 options+=("No modifications")
 actions+=("echo 'No modifications selected.'")
 
-# Option 2: Enable Remote Hardware.
-# This updates every platformio.ini file by replacing "-DMESHTASTIC_EXCLUDE_REMOTEHARDWARE=1" with "0".
-read -r -d '' act_enable <<'EOF'
+# --- Option 2: Enable Remote Hardware ---
+# This action updates all platformio.ini files: replaces -DMESHTASTIC_EXCLUDE_REMOTEHARDWARE=1 with =0.
+read -r -d '' enableRHAction <<'EOF'
 find . -type f -name "platformio.ini" | while read -r file; do
-  if grep -q -- "-DMESHTASTIC_EXCLUDE_REMOTEHARDWARE=1" "$file"; then
-    echo "Processing: $file"
-    sed -i 's/-DMESHTASTIC_EXCLUDE_REMOTEHARDWARE=1/-DMESHTASTIC_EXCLUDE_REMOTEHARDWARE=0/g' "$file"
-  fi
+    if grep -q -- "-DMESHTASTIC_EXCLUDE_REMOTEHARDWARE=1" "$file"; then
+        echo "Processing: $file"
+        sed -i 's/-DMESHTASTIC_EXCLUDE_REMOTEHARDWARE=1/-DMESHTASTIC_EXCLUDE_REMOTEHARDWARE=0/g' "$file"
+    fi
 done
 echo "All platformio.ini files have been updated."
 EOF
 
 options+=("Enable Remote Hardware")
-actions+=("$act_enable")
+actions+=("$enableRHAction")
 
-# Option 3: Enable Remote Hardware + apply extra.bbs.patch.
-if [ -f extra.bbs.patch ]; then
-    read -r -d '' act_extra <<'EOF'
-find . -type f -name "platformio.ini" | while read -r file; do
-  if grep -q -- "-DMESHTASTIC_EXCLUDE_REMOTEHARDWARE=1" "$file"; then
-    echo "Processing: $file"
-    sed -i 's/-DMESHTASTIC_EXCLUDE_REMOTEHARDWARE=1/-DMESHTASTIC_EXCLUDE_REMOTEHARDWARE=0/g' "$file"
-  fi
-done
-echo "All platformio.ini files have been updated."
-echo "Applying extra.bbs.patch..."
-git apply extra.bbs.patch
-EOF
-    options+=("Enable Remote Hardware + apply extra.bbs.patch")
-    actions+=("$act_extra")
+# --- Option 3: Enable Remote Hardware + apply extra patch ---
+# Only add if extra patch exists and no env patch exists,
+# OR if both exist we’ll add a dedicated option later.
+if [ -n "$extraPatchFile" ] && [ -z "$envPatchFile" ]; then
+    options+=("Enable Remote Hardware + apply $extraPatchFile")
+    actions+=("$enableRHAction
+echo 'Applying $extraPatchFile...'
+git apply $extraPatchFile")
 fi
 
-# Option 4: Enable Remote Hardware + apply extra.bbs.patch + tracker-t1000-e.patch.
-if [ -f extra.bbs.patch ] && [ -f tracker-t1000-e.patch ]; then
-    read -r -d '' act_both <<'EOF'
-find . -type f -name "platformio.ini" | while read -r file; do
-  if grep -q -- "-DMESHTASTIC_EXCLUDE_REMOTEHARDWARE=1" "$file"; then
-    echo "Processing: $file"
-    sed -i 's/-DMESHTASTIC_EXCLUDE_REMOTEHARDWARE=1/-DMESHTASTIC_EXCLUDE_REMOTEHARDWARE=0/g' "$file"
-  fi
-done
-echo "All platformio.ini files have been updated."
-echo "Applying extra.bbs.patch..."
-git apply extra.bbs.patch
-echo "Applying tracker-t1000-e.patch..."
-git apply tracker-t1000-e.patch
-EOF
-    options+=("Enable Remote Hardware + apply extra.bbs.patch + tracker-t1000-e.patch")
-    actions+=("$act_both")
+# --- Option 4: Enable Remote Hardware + apply extra patch + apply env patch ---
+if [ -n "$extraPatchFile" ] && [ -n "$envPatchFile" ]; then
+    options+=("Enable Remote Hardware + apply $extraPatchFile + apply ${envPatchFile}")
+    actions+=("$enableRHAction
+echo 'Applying $extraPatchFile...'
+git apply $extraPatchFile
+echo 'Applying ${envPatchFile}...'
+git apply ${envPatchFile}")
 fi
 
-# Option 5: Apply tracker-t1000-e.patch only.
-if [ -f tracker-t1000-e.patch ]; then
-    read -r -d '' act_tracker <<'EOF'
-echo "Applying tracker-t1000-e.patch..."
-git apply tracker-t1000-e.patch
-EOF
-    options+=("tracker-t1000-e.patch")
-    actions+=("$act_tracker")
+# --- Option 5: Apply env patch only ---
+# Two cases: when extra patch is absent OR as an additional option if both exist.
+if [ -n "$envPatchFile" ]; then
+    # If extra patch is absent, this will be the only env option.
+    options+=("Apply ${envPatchFile}")
+    actions+=("echo 'Applying ${envPatchFile}...'
+git apply ${envPatchFile}")
 fi
 
-# Display the menu.
+# Display the dynamic menu.
 echo "Select an option:"
 for i in "${!options[@]}"; do
     printf "%d) %s\n" $((i+1)) "${options[$i]}"
@@ -222,15 +220,14 @@ done
 
 read -rp "Enter your choice (1-${#options[@]}): " choice
 
-# Validate input.
+# Validate the choice.
 if ! [[ "$choice" =~ ^[0-9]+$ ]] || [ "$choice" -lt 1 ] || [ "$choice" -gt "${#options[@]}" ]; then
     echo "Invalid choice. Exiting."
     exit 1
 fi
 
-selected_index=$((choice-1))
+selected_index=$((choice - 1))
 echo "Executing: ${options[$selected_index]}"
-# Execute the corresponding action.
 eval "${actions[$selected_index]}"
 
 
@@ -297,8 +294,10 @@ if [ -n "$SRCHEX" ]; then
 	cp bin/*.uf2 "$OUTDIR"
 else
     echo "Building Filesystem with web server for ESP32 targets"
-    pio run --environment "$selected_env" -t buildfs
+    pio run -v --environment "$selected_env" -t buildfs
     cp .pio/build/"$selected_env"/littlefs.bin "$OUTDIR"/littlefswebui-"$selected_env"-"$VERSION".bin
+    read -rp "Press Enter to continue..."    
+
     echo "Building Filesystem only for ESP32 targets"
     # Remove webserver files from the filesystem and rebuild
     ls -l data/static # Diagnostic list of files
