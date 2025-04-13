@@ -183,6 +183,13 @@ meshtastic --ch-set downlink_enabled true --ch-index 2
 meshtastic --set mqtt.enabled true
 ```
 
+https://meshtastic.org/docs/configuration/module/neighbor-info/  
+```
+meshtastic --set neighbor_info.transmit_over_lora true
+meshtastic --set neighbor_info.enabled true
+```
+
+
 # Disable Bluetooth
 https://meshtastic.org/docs/configuration/radio/bluetooth/#bluetooth-config-client-availability
 ```
