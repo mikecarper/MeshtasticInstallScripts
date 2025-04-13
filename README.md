@@ -202,6 +202,12 @@ https://meshtastic.org/docs/configuration/radio/bluetooth/#bluetooth-config-clie
 meshtastic --set bluetooth.enabled false
 ```
 
+# Restart the PI at 3:30am
+sudo crontab -e
+```
+30 3 * * * /sbin/shutdown -r now
+```
+
 # Install CLI client
 https://github.com/pdxlocations/contact  
 ```
