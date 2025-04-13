@@ -200,6 +200,11 @@ https://meshtastic.org/docs/configuration/radio/bluetooth/#bluetooth-config-clie
 meshtastic --set bluetooth.enabled false
 ```
 
+# Install CLI client
+https://github.com/pdxlocations/contact  
+```
+pipx install contact
+```
 
 # Install BBS system.
 https://github.com/SpudGunMan/meshing-around
