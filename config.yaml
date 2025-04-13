@@ -1,0 +1,75 @@
+# start of Meshtastic configure yaml
+channel_url: https://meshtastic.org/e/#
+config:
+  bluetooth:
+    fixedPin: 123456
+    mode: FIXED_PIN
+  device:
+    disableTripleClick: true
+    nodeInfoBroadcastSecs: 10800
+    role: CLIENT_MUTE
+  display:
+    screenOnSecs: 30
+  lora:
+    configOkToMqtt: true
+    hopLimit: 3
+    region: US
+    sx126xRxBoostedGain: true
+    txEnabled: true
+    txPower: 10
+    usePreset: true
+  network:
+    enabledProtocols: 1
+    ntpServer: meshtastic.pool.ntp.org
+    wifiEnabled: true
+    wifiPsk: topsecret
+    wifiSsid: FCCVan
+  position:
+    broadcastSmartMinimumDistance: 100
+    broadcastSmartMinimumIntervalSecs: 30
+    fixedPosition: true
+    gpsMode: NOT_PRESENT
+    gpsUpdateInterval: 120
+    positionBroadcastSecs: 900
+    positionBroadcastSmartEnabled: true
+    positionFlags: 811
+  power:
+    lsSecs: 300
+    minWakeSecs: 10
+    sdsSecs: 4294967295
+    waitBluetoothSecs: 60
+  security:
+    serialEnabled: true
+location:
+  alt: 86
+  lat: 47.0
+  lon: -122.0
+module_config:
+  ambientLighting:
+    blue: 52
+    current: 10
+    green: 111
+    red: 233
+  detectionSensor:
+    detectionTriggerType: LOGIC_HIGH
+    minimumBroadcastSecs: 45
+  mqtt:
+    address: mqtt.davekeogh.com
+    enabled: true
+    encryptionEnabled: true
+    mapReportingEnabled: true
+    password: large4cats
+    root: msh/US
+    username: meshdev
+  neighborInfo:
+    enabled: true
+    transmitOverLora: true
+  remoteHardware:
+    allowUndefinedPinAccess: true
+    enabled: true
+  storeForward:
+    enabled: true
+    isServer: true
+owner: BBS Bot ffff
+owner_short: ffff
+
