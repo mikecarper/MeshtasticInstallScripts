@@ -1,10 +1,42 @@
 #!/usr/bin/env python3
 
-import time
-import board
-import busio
-from adafruit_ina219 import ADCResolution, BusVoltageRange, INA219
 import sys
+import time
+import busio
+
+try:
+    import board
+except ModuleNotFoundError as err:
+    print("Error: The 'board' module is not installed.", file=sys.stderr)
+    print("This module is typically provided by the Adafruit Blinka library.", file=sys.stderr)
+    print("To fix this, try running:", file=sys.stderr)
+    print("    pip install adafruit-blinka --break-system-packages", file=sys.stderr)
+    sys.exit(1)
+
+try:
+    from adafruit_ina219 import ADCResolution, BusVoltageRange, INA219
+except ModuleNotFoundError as err:
+    print("Error: The 'adafruit_ina219' module is not installed.", file=sys.stderr)
+    print("This module is provided by the Adafruit CircuitPython INA219 library.", file=sys.stderr)
+    print("To fix this issue, please run:", file=sys.stderr)
+    print("    pip install adafruit-circuitpython-ina219 --break-system-packages", file=sys.stderr)
+    sys.exit(1)
+
+# --- Begin Added Code: Set Internal Pull-Ups on I2C Pins using RPi.GPIO ---
+#try:
+#    import RPi.GPIO as GPIO
+#except ModuleNotFoundError:
+#    print("Warning: RPi.GPIO module not found. Skipping setting internal pull-ups.", file=sys.stderr)
+#else:
+    # Use Broadcom numbering.
+    #GPIO.setmode(GPIO.BCM)
+    # Setup I²C pins with internal pull-ups:
+    # Typical Raspberry Pi I2C pins are:
+    #   SDA on GPIO2 and SCL on GPIO3.
+    #GPIO.setup(2, GPIO.IN, pull_up_down=GPIO.PUD_UP)  # SDA (GPIO2)
+    #GPIO.setup(3, GPIO.IN, pull_up_down=GPIO.PUD_UP)  # SCL (GPIO3)
+# --- End Added Code ---
+
 import os
 import glob
 import psutil
@@ -19,15 +51,19 @@ try:
     i2c = busio.I2C(board.SCL, board.SDA)
     ina = INA219(i2c)
 except ValueError as e:
+    err_str = str(e)
     # Check if the message indicates hardware I2C is not enabled
-    if "No Hardware I2C on" in str(e):
+    if "No Hardware I2C on" in err_str:
         print("I²C appears to be disabled. Please run:")
         print("   sudo raspi-config")
         print("   Go to 'Interface Options' → 'I2C' → select 'Enable'.")
         sys.exit(1)
     else:
-        # Some other ValueError
-        raise
+        if "No I2C device at address: 0x40" in err_str:
+            print("ValueError: No I2C device at address: 0x40", file=sys.stderr)
+        else:
+            print("ValueError:", err, file=sys.stderr)
+        sys.exit(1)
 
 # ----- Initialize Min/Max Variables -----
 min_voltage = float('inf')
