@@ -13,14 +13,12 @@ try:
     for led, pin in zip(leds, pins):
         led.on()
         print(f"GPIO {pin} turned ON")
-        time.sleep(1)
     time.sleep(3)  # Keep them on for 3 seconds
 
     # Turn all "LEDs" off
     for led, pin in zip(leds, pins):
         led.off()
         print(f"GPIO {pin} turned OFF")
-    time.sleep(3)  # Keep them off for 3 seconds
 
 finally:
     # Optionally, gpiozero cleans up automatically when the objects are deleted.
