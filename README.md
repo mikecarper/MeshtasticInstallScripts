@@ -205,6 +205,7 @@ meshtastic --set bluetooth.enabled false
 # Restart the PI at 3:30am
 sudo crontab -e
 ```
+25 3 * * * /home/bbs/MeshtasticInstallScripts/gpio_pi.py
 30 3 * * * /sbin/shutdown -r now
 ```
 
