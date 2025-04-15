@@ -1,5 +1,13 @@
 #!/bin/bash
 
+# Create small package (no debugging symbols)
+# Add `argp` for musl
+# -Os: Optimize for size; enables most -O2 optimizations.
+#-ffunction-sections -fdata-sections: Place individual functions and data in their own sections. 
+#   Allows the linker to later remove any sections that aren’t referenced in the final executable.
+# -Wl,--gc-sections: Linker garbage collection of unused sections.
+# -largp: Link against the argp library; provides command-line argument parsing.
+PLATFORMIO_BUILD_FLAGS="-Os -ffunction-sections -fdata-sections -Wl,--gc-sections -largp"
 
 VPN_INFO="$HOME/.vpnServerInfo"
 # Number of attempts for each file
@@ -254,14 +262,16 @@ mkdir -p "$OUTDIR"
 
 basename=firmware-$selected_env-$VERSION
 
-echo "Building for $selected_env with $PLATFORMIO_BUILD_FLAGS. $basename"
+
 rm -f .pio/build/"$selected_env"/firmware.*
 
 if [ -z "$env_arg" ]; then
-    read -rp "Press Enter to continue..."
+    read -rp "Target: $basename. Press Enter to continue..."
 fi
 
 platformio pkg update -e "$selected_env"
+echo "Building for $selected_env with PLATFORMIO_BUILD_FLAGS: > $PLATFORMIO_BUILD_FLAGS <"
+
 pio run --environment "$selected_env" # -v
 SRCELF=.pio/build/"$selected_env"/firmware.elf
 cp "$SRCELF" "$OUTDIR"/"$basename".elf
@@ -331,6 +341,7 @@ if [ -f "$VPN_INFO" ]; then
         printf "\r" # Move the cursor to the beginning of the line.
         tput cuu1 # Move the cursor up one line.
         tput el # Clear the entire line.
+        echo ""
 
         if [ "$PASSWORD" != "skip" ] && [ -n "$PASSWORD" ]; then
             # The PASSWORD is not "skip" and it is not empty.
