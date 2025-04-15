@@ -17,7 +17,6 @@ git switch master 2>/dev/null || git checkout master
 git reset --hard origin/master
 git fetch origin
 git pull --recurse-submodules
-git_reset=1
 
 
 # Get environment names from platformio.ini files.
@@ -103,7 +102,6 @@ echo "Final environment: $selected_env"
 
 
 VERSION=$(bin/buildinfo.py long)
-VERSION="${VERSION::-3}777"
 
 # Get the last 20 tags (sorted by creation date descending)
 mapfile -t tags < <(git tag --sort=-creatordate | head -n20 | tac)
@@ -130,7 +128,6 @@ if [[ "$choice" =~ ^[0-9]+$ ]]; then
         selected="${tagmap[$choice]}"
         echo "You selected tag: $selected"
         git reset --hard
-        git_reset=1
         git config advice.detachedHead false
         git checkout "$selected"
     elif [ "$choice" -eq "$n" ]; then
@@ -240,28 +237,31 @@ if [ -f extra.bbs.patch ] || [ -f extra.patch ]; then
     fi
 fi
 
+#VERSION_ORIGINAL="${VERSION}"
+if grep -q "DMESHTASTIC_EXCLUDE_REMOTEHARDWARE=0" platformio.ini; then
+    VERSION="${VERSION::-4}GPIO"
+fi
+
+# The shell vars the build tool expects to find
+export APP_VERSION=$VERSION
+OUTDIR="release/$VERSION"
+
+rm -f "${OUTDIR:?}"/firmware* || true
+if [ -d "${OUTDIR:?}" ]; then
+    rm -r "${OUTDIR:?}"/* || true
+fi
+mkdir -p "$OUTDIR"
+
+basename=firmware-$selected_env-$VERSION
+
+echo "Building for $selected_env with $PLATFORMIO_BUILD_FLAGS. $basename"
+rm -f .pio/build/"$selected_env"/firmware.*
+
 if [ -z "$env_arg" ]; then
     read -rp "Press Enter to continue..."
 fi
 
-
 platformio pkg update -e "$selected_env"
-
-
-# The shell vars the build tool expects to find
-export APP_VERSION=$VERSION
-OUTDIR=release/$VERSION/
-
-rm -f "${OUTDIR:?}"/firmware*
-rm -r "${OUTDIR:?}"/* || true
-mkdir -p "$OUTDIR"
-
-echo "Building for $selected_env with $PLATFORMIO_BUILD_FLAGS"
-rm -f .pio/build/"$selected_env"/firmware.*
-
-
-basename=firmware-$selected_env-$VERSION
-
 pio run --environment "$selected_env" # -v
 SRCELF=.pio/build/"$selected_env"/firmware.elf
 cp "$SRCELF" "$OUTDIR"/"$basename".elf
@@ -294,9 +294,8 @@ if [ -n "$SRCHEX" ]; then
 	cp bin/*.uf2 "$OUTDIR"
 else
     echo "Building Filesystem with web server for ESP32 targets"
-    pio run -v --environment "$selected_env" -t buildfs
+    pio run --environment "$selected_env" -t buildfs
     cp .pio/build/"$selected_env"/littlefs.bin "$OUTDIR"/littlefswebui-"$selected_env"-"$VERSION".bin
-    read -rp "Press Enter to continue..."    
 
     echo "Building Filesystem only for ESP32 targets"
     # Remove webserver files from the filesystem and rebuild
@@ -305,8 +304,8 @@ else
     pio run --environment "$selected_env" -t buildfs
     cp .pio/build/"$selected_env"/littlefs.bin "$OUTDIR"/littlefs-"$selected_env"-"$VERSION".bin
 fi
-cp bin/device-install.* "$OUTDIR"
-cp bin/device-update.* "$OUTDIR"
+cp bin/device-install.* "$OUTDIR"/
+cp bin/device-update.* "$OUTDIR"/
 
 rm "$OUTDIR"/"$basename".elf
 
@@ -329,8 +328,12 @@ if [ -f "$VPN_INFO" ]; then
         # Prompt for the password once.
 
         read -rp "Enter password for SCP/SSH: " PASSWORD < /dev/tty
+        printf "\r" # Move the cursor to the beginning of the line.
+        tput cuu1 # Move the cursor up one line.
+        tput el # Clear the entire line.
 
-        if [ "$PASSWORD" != "skip" ]; then
+        if [ "$PASSWORD" != "skip" ] && [ -n "$PASSWORD" ]; then
+            # The PASSWORD is not "skip" and it is not empty.
             for file in "$OUTDIR"/*; do
                 [ -f "$file" ] || continue
                 basefile=$(basename "$file")
