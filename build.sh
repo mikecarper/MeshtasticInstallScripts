@@ -322,6 +322,7 @@ rm "$OUTDIR"/"$basename".elf
 find "$OUTDIR" -maxdepth 1 -type f -exec du -h {} \; \
   | sed 's|^\./||' \
   | awk '{print $1, $2}' \
+  | sort -k2 \
   | column -t
 
 if [ -f "$VPN_INFO" ]; then
