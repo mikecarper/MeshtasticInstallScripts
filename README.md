@@ -163,6 +163,7 @@ meshtastic --ch-index 4 --ch-del
 https://meshtastic.org/docs/configuration/module/mqtt/#mqtt-module-config-client-availability
 ```
 meshtastic --set network.wifi_enabled true --set network.wifi_ssid "FCC Van" --set network.wifi_psk "wifipassword"
+meshtastic --set network.enabled_protocols 1
 meshtastic --set lora.config_ok_to_mqtt true
 meshtastic --set mqtt.address mqtt.davekeogh.com
 meshtastic --set mqtt.username meshdev
