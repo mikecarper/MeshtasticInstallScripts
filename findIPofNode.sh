@@ -9,22 +9,22 @@ trap 'rm -f "$TMPINFO"' EXIT
 meshtastic --info > "$TMPINFO"
 
 # 3) Debug: show the full dump (or tail/head if you want less)
-echo "[DEBUG] Full meshtastic --info output:" >&2
-cat "$TMPINFO" >&2
+#echo "[DEBUG] Full meshtastic --info output:" >&2
+#cat "$TMPINFO" >&2
 
 # 4) Debug: find the myNodeNum line
-echo "[DEBUG] myNodeNum line:" >&2
-grep '"myNodeNum"' "$TMPINFO" >&2
+#echo "[DEBUG] myNodeNum line:" >&2
+#grep '"myNodeNum"' "$TMPINFO" >&2
 
 # 5) Extract the node number
 myNodeNum=$(grep '"myNodeNum"' "$TMPINFO" \
              | sed -E 's/.*"myNodeNum":[[:space:]]*([0-9]+).*/\1/')
 
-echo "[DEBUG] Parsed myNodeNum = $myNodeNum" >&2
+#echo "[DEBUG] Parsed myNodeNum = $myNodeNum" >&2
 
 # 6) Debug: locate the matching "num" line
-echo "[DEBUG] num line:" >&2
-grep -n "\"num\": $myNodeNum" "$TMPINFO" >&2
+#echo "[DEBUG] num line:" >&2
+#grep -n "\"num\": $myNodeNum" "$TMPINFO" >&2
 
 # 7) Grab the raw MAC above that line, e.g. "!ffffffff"
 raw_mac=$(grep -B1 "\"num\": $myNodeNum" "$TMPINFO" \
@@ -38,4 +38,6 @@ raw_mac=${raw_mac#!}
 formatted_mac=$(echo "$raw_mac" | sed -E 's/../&:/g; s/:$//')
 
 # 10) Print the cleaned‐up MAC
-echo "$formatted_mac"
+#echo "$formatted_mac"
+
+sudo arp-scan --localnet --quiet 2>/dev/null | grep -i "$formatted_mac" | cut -f1
