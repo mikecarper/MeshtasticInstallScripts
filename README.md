@@ -26,7 +26,7 @@ chmod +x InstallFiles.sh
 ```
 sudo apt update
 sudo apt -y upgrade
-sudo apt -y install git jq ntp virtualenvwrapper curl pipx pip fonts-noto-color-emoji npm software-properties-common mosquitto mosquitto-clients python3-poetry socat nmap iptables-persistent shellcheck python3-rpi.gpio screen shfmt i2c-tools tmux cmake libdbus-1-dev 
+sudo apt -y install git jq ntp virtualenvwrapper curl pipx pip fonts-noto-color-emoji npm software-properties-common mosquitto mosquitto-clients python3-poetry socat nmap iptables-persistent shellcheck python3-rpi.gpio screen shfmt i2c-tools tmux cmake libdbus-1-dev xvfb 
 sudo hostnamectl set-hostname GeoBBS
 ```
 
@@ -214,6 +214,11 @@ sudo crontab -e
 https://github.com/pdxlocations/contact  
 ```
 pipx install contact
+```
+
+# Get the IP address of the node
+```
+sudo arp-scan --localnet --quiet 2>/dev/null | grep -i '6f:34' | cut -f1
 ```
 
 # Install BBS system.
