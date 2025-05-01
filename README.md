@@ -321,8 +321,28 @@ export GNOME_KEYRING_CONTROL
 dbus-run-session xvfb-run ./meshsense-beta-arm64.AppImage --headless --disable-gpu
 ```
 
-
-
 # Enable the live log viewer
 Follow the directions found here
 https://github.com/mikecarper/MeshtasticInstallScripts/blob/main/logViewerWeb/readme.md
+
+
+# ShortFast
+https://meshtastic.org/docs/configuration/radio/lora/#lora-config-client-availability  
+```
+meshtastic --set lora.modem_preset SHORT_FAST
+ meshtastic --ch-set downlink_enabled true --ch-index 0
+meshtastic --ch-add "LongFast"
+meshtastic --ch-set psk "base64:AQ==" --ch-index 4
+meshtastic --ch-set module_settings.position_precision 13 --ch-index 4
+meshtastic --ch-set uplink_enabled true --ch-index 4
+```
+
+
+# LongFast
+https://meshtastic.org/docs/configuration/radio/lora/#lora-config-client-availability  
+```
+meshtastic --set lora.modem_preset LONG_FAST
+meshtastic --ch-add "ShortFast"
+meshtastic --ch-set psk "base64:AQ==" --ch-index 4
+meshtastic --ch-set module_settings.position_precision 13 --ch-index 4
+```
