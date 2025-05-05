@@ -717,7 +717,7 @@ function SelectRelease {
         $maxLabelLength = ($versionsLabels | Measure-Object Length -Maximum).Maximum
         $indexWidth     = $count.ToString().Length
         $colLabelWidth  = $maxLabelLength + 2
-        $colWidth       = $indexWidth + 2 + $colLabelWidth + 1
+        $colWidth       = $indexWidth + 2 + $colLabelWidth + 8
         $numPerRow      = [Math]::Max(1, [int]($termWidth / $colWidth))
 
         # 1) BUILD the array of PSCustomObject{text, color}
