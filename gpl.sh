@@ -4,6 +4,7 @@ set -euo pipefail
 IGNORE_ORG=meshtastic
 GITHUB_USER=
 GITHUB_TOKEN=
+# https://github.com/settings/tokens
 
 # -----------------------------------------------------------------------------
 # fetch_search_array <kind> <query> <outfile>
